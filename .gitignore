@@ -1,0 +1,24 @@
+# R and RStudio
+.Rhistory
+.Rapp.history
+.RData
+.Ruserdata
+.Rproj.user/
+*.Rproj
+
+# Package build artifacts
+*.tar.gz
+*.Rcheck/
+
+# Dependency managers
+renv/library/
+renv/python/
+
+# Quarto and generated sites
+.quarto/
+_site/
+_book/
+
+# OS files
+.DS_Store
+Thumbs.db
