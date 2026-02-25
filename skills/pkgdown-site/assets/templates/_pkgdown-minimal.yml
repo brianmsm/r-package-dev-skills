@@ -1,0 +1,17 @@
+url: https://ORG.github.io/REPO
+
+template:
+  bootstrap: 5
+
+home:
+  title: REPO
+  description: One-line package description.
+
+navbar:
+  structure:
+    left: [home, reference, articles, news]
+    right: [github]
+  components:
+    github:
+      icon: fa-github
+      href: https://github.com/ORG/REPO

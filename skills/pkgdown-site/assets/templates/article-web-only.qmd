@@ -1,0 +1,35 @@
+---
+title: "Workflow title"
+format:
+  html:
+    toc: true
+execute:
+  echo: true
+---
+
+## Context
+
+Explain when to use this workflow.
+
+## Prerequisites
+
+- expected package version
+- input assumptions
+
+## Step-by-step
+
+```{r}
+#| eval: false
+# library(REPO)
+# inputs <- prepare_inputs(...)
+# output <- run_analysis(inputs)
+```
+
+## Common pitfalls
+
+- pitfall one and how to avoid it
+- pitfall two and how to diagnose it
+
+## Related reference
+
+- link to relevant functions in `reference/`

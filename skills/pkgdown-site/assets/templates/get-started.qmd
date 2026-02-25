@@ -1,0 +1,44 @@
+---
+title: "Get started"
+format:
+  html:
+    toc: true
+execute:
+  echo: true
+---
+
+## Goal
+
+State the user outcome of this guide in one paragraph.
+
+## Prerequisites
+
+- R version requirement
+- package installation
+
+## Install
+
+```{r}
+#| eval: false
+# install.packages("REPO")
+```
+
+## Happy path workflow
+
+```{r}
+#| eval: false
+# library(REPO)
+# data <- example_data()
+# result <- run_workflow(data)
+# print(result)
+```
+
+## Interpret results
+
+Explain how to read the main outputs.
+
+## Where to go next
+
+- advanced workflow article
+- FAQ article
+- function reference page

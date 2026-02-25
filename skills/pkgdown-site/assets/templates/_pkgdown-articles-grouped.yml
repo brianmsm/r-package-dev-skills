@@ -1,0 +1,38 @@
+url: https://ORG.github.io/REPO
+
+template:
+  bootstrap: 5
+
+home:
+  title: REPO
+  description: One-line package description.
+
+navbar:
+  structure:
+    left: [get-started, reference, articles, news]
+    right: [github]
+  components:
+    get-started:
+      text: Get started
+      href: articles/get-started.html
+    articles:
+      text: Articles
+      menu:
+        - text: Workflows
+          href: articles/index.html
+        - text: FAQ
+          href: articles/faq.html
+    github:
+      icon: fa-github
+      href: https://github.com/ORG/REPO
+
+articles:
+  - title: Get started
+    contents:
+      - get-started
+  - title: Workflows
+    contents:
+      - starts_with("workflow-")
+  - title: Concepts
+    contents:
+      - starts_with("concept-")
