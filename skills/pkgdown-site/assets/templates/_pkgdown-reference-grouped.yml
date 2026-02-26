@@ -1,0 +1,97 @@
+# Reference index grouping template for pkgdown
+# Copy this top-level `reference:` block into your main _pkgdown.yml.
+#
+# Why this exists:
+# - Helps organize large function APIs into readable sections.
+# - Uses pkgdown selectors and optional concept/lifecycle grouping.
+#
+# Notes:
+# - Order matters. Keep specific selectors before broad catch-all selectors.
+# - If you intentionally omit topics from visible reference, use `title: internal`
+#   (case-sensitive) for hidden entries.
+
+reference:
+  - title: Core
+    desc: >
+      Main user-facing entry points. Keep this section small and curated.
+    contents:
+      # Prefer explicit high-value topics when possible:
+      # - yourpackage
+      # - fit_model
+      # - predict_model
+      # - plot_model
+      #
+      # Or use stable prefixes if naming is consistent:
+      - starts_with("fit_")
+      - starts_with("predict_")
+      - starts_with("plot_")
+
+  - title: Data
+    desc: >
+      Import, validation, transformation, and export helpers.
+
+  - subtitle: Import
+    contents:
+      - starts_with("read_")
+      - starts_with("import_")
+
+  - subtitle: Export
+    contents:
+      - starts_with("write_")
+      - starts_with("export_")
+
+  - subtitle: Validation
+    contents:
+      - starts_with("validate_")
+      - starts_with("check_")
+
+  - title: Utilities
+    desc: >
+      Conversion and helper functions.
+    contents:
+      - starts_with("as_")
+      - starts_with("is_")
+      - starts_with("make_")
+      - starts_with("build_")
+
+  - title: Datasets
+    desc: >
+      Data objects shipped with the package.
+    contents:
+      - has_keyword("datasets")
+
+  # Optional concept-based sections (from roxygen @family/@concept tags):
+  #
+  # - title: Concepts
+  # - subtitle: Modeling
+  #   contents:
+  #     - has_concept("modeling")
+  # - subtitle: Diagnostics
+  #   contents:
+  #     - has_concept("diagnostics")
+  # - subtitle: Other
+  #   contents:
+  #     - lacks_concepts(c("modeling", "diagnostics"))
+
+  - title: Lifecycle
+    desc: >
+      Deprecated, superseded, or otherwise lifecycle-marked topics.
+
+  - subtitle: Deprecated
+    contents:
+      - has_lifecycle("deprecated")
+
+  # Catch-all to avoid missing-topic errors/warnings on large packages.
+  # Keep this near the end and tune exclusions as needed.
+  - title: Other
+    desc: >
+      Topics not captured by the earlier sections.
+    contents:
+      - matches(".*")
+      - -starts_with("internal_")
+
+  # Hidden section for intentionally non-user-facing topics.
+  # IMPORTANT: title must be exactly `internal` (case-sensitive).
+  - title: internal
+    contents:
+      - starts_with("internal_")

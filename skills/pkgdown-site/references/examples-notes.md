@@ -167,6 +167,24 @@ A useful default:
 - FAQ
 - developer
 
+## Reference Index Grouping Patterns
+
+When package APIs grow, group the Reference index explicitly in `_pkgdown.yml`:
+
+- use `title` for major areas (Core, Data, Utilities)
+- use `subtitle` for sub-families (Import, Export, Validation)
+- use `contents` with selectors (`starts_with()`, `has_concept()`, `has_lifecycle()`)
+
+Practical guidance:
+
+- put specific selectors before broad selectors
+- keep a catch-all section near the end for leftovers
+- use `title: internal` (case-sensitive) only for intentionally hidden topics
+
+Template starting point:
+
+- `assets/templates/_pkgdown-reference-grouped.yml`
+
 ## Practical Documentation Sets (Domain-Agnostic)
 
 These are sample sets, not prescriptions.

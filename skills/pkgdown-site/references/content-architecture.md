@@ -78,6 +78,10 @@ Rule of thumb:
 - reference answers "what does this function do?"
 - articles answer "how do I complete this task?"
 
+For growing APIs, group the reference index with `_pkgdown.yml` `reference:` sections
+(`title`, `subtitle`, `contents`) so users can scan by function family.
+Use `assets/templates/_pkgdown-reference-grouped.yml` as a starting point.
+
 ### Articles
 
 Use articles for:

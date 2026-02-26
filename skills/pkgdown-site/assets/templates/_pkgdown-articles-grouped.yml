@@ -12,6 +12,8 @@
 # - A vignette with the same name as the package becomes a top-level "Get started" link by default.
 #   If you want "Get started" inside Articles instead, see the optional variant below.
 # - Tutorials are optional. Add `tutorials` to navbar only if tutorials are configured/hosted.
+# - For large function APIs, add a grouped `reference:` block from
+#   `assets/templates/_pkgdown-reference-grouped.yml`.
 
 url: https://<user-or-org>.github.io/<repo>/
 
