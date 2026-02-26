@@ -203,6 +203,16 @@ main <- function() {
     }
   )
 
+  if (!is.list(cfg) || is.null(names(cfg)) || length(cfg) == 0) {
+    stop(
+      sprintf(
+        "Invalid _pkgdown.yml root in %s. Expected a YAML mapping (key: value), e.g. `tutorials:` or `url:`.",
+        opts$cfg_path
+      ),
+      call. = FALSE
+    )
+  }
+
   tutorials <- cfg$tutorials
   msg("\n== Tutorial URL check ==", quiet = opts$quiet)
   msg("Config: ", cfg_path, quiet = opts$quiet)

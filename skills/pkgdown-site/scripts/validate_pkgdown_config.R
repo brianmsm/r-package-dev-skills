@@ -98,6 +98,17 @@ as_chr <- function(x) {
   character()
 }
 
+is_yaml_mapping <- function(x) {
+  is.list(x) && !is.null(names(x)) && length(x) > 0
+}
+
+as_scalar_text <- function(x) {
+  vals <- as_chr(x)
+  vals <- vals[!is.na(vals)]
+  if (length(vals) == 0) return("")
+  trimws(as.character(vals[[1]]))
+}
+
 is_selector_expr <- function(x) {
   if (!is.character(x) || length(x) != 1) return(FALSE)
   grepl("\\(", x) || grepl("\\)", x)
@@ -113,18 +124,14 @@ collect_vignette_stems <- function(vignettes_dir) {
   files <- list.files(
     vignettes_dir,
     recursive = TRUE,
-    full.names = TRUE
+    full.names = FALSE
   )
   files <- files[grepl("\\.(Rmd|qmd|md)$", files, ignore.case = TRUE)]
   if (length(files) == 0) return(character())
 
-  root <- normalizePath(vignettes_dir, winslash = "/", mustWork = TRUE)
-  files_norm <- normalizePath(files, winslash = "/", mustWork = TRUE)
-
-  rel <- sub(paste0("^", gsub("([.|()\\^{}+$*?]|\\[|\\]|\\\\)", "\\\\\\1", root), "/?"), "", files_norm)
-  rel <- sub("^[/\\\\]", "", rel)
+  rel <- gsub("\\\\", "/", files)
+  rel <- sub("^\\./", "", rel)
   stems <- sub("\\.[^.]+$", "", rel)
-  stems <- gsub("\\\\", "/", stems)
   unique(stems)
 }
 
@@ -165,8 +172,10 @@ validate_repo_basics <- function(root_dir, warnings, errors, template_mode = FAL
 
 validate_url <- function(cfg, warnings, errors) {
   url <- cfg$url
+  url_vals <- as_chr(url)
+  url_vals <- url_vals[!is.na(url_vals)]
 
-  if (is.null(url) || length(url) == 0 || !nzchar(trimws(as.character(url[[1]])))) {
+  if (length(url_vals) == 0 || !nzchar(trimws(url_vals[[1]]))) {
     warnings <- c(
       warnings,
       "No `url:` found in _pkgdown.yml. Internal links may be less reliable, and the site URL will not be explicit."
@@ -174,7 +183,7 @@ validate_url <- function(cfg, warnings, errors) {
     return(list(warnings = warnings, errors = errors))
   }
 
-  url_scalar <- as.character(url[[1]])
+  url_scalar <- trimws(as.character(url_vals[[1]]))
   if (!is_http_url(url_scalar)) {
     warnings <- c(
       warnings,
@@ -182,7 +191,7 @@ validate_url <- function(cfg, warnings, errors) {
     )
   }
 
-  if (length(url) > 1) {
+  if (length(url_vals) > 1) {
     warnings <- c(warnings, "`url` has multiple values; expected a single scalar string.")
   }
 
@@ -281,6 +290,82 @@ extract_explicit_article_refs <- function(articles_cfg) {
   unique(refs)
 }
 
+extract_articles_section_info <- function(articles_cfg) {
+  if (is.null(articles_cfg) || !is.list(articles_cfg)) return(list())
+
+  out <- list()
+  for (i in seq_along(articles_cfg)) {
+    section <- articles_cfg[[i]]
+    if (!is.list(section)) next
+    contents <- section$contents
+    if (is.null(contents)) next
+
+    vals <- as_chr(contents)
+    vals <- vals[!is.na(vals) & nzchar(vals)]
+    if (length(vals) == 0) next
+
+    selectors <- vals[vapply(vals, is_selector_expr, logical(1))]
+    explicit <- vals[!vapply(vals, is_selector_expr, logical(1))]
+
+    label <- as_scalar_text(section$title)
+    if (!nzchar(label)) label <- as_scalar_text(section$navbar)
+    if (!nzchar(label)) label <- paste0("articles section #", i)
+
+    out[[length(out) + 1]] <- list(
+      label = label,
+      selectors = selectors,
+      explicit = explicit
+    )
+  }
+
+  out
+}
+
+parse_simple_selector <- function(expr) {
+  if (!is.character(expr) || length(expr) != 1) return(NULL)
+
+  raw <- trimws(expr)
+  if (!nzchar(raw)) return(NULL)
+
+  negative <- FALSE
+  if (startsWith(raw, "-")) {
+    negative <- TRUE
+    raw <- trimws(sub("^-", "", raw))
+  }
+
+  m <- regexec("^([A-Za-z_][A-Za-z0-9_]*)\\s*\\((.*)\\)\\s*$", raw)
+  parts <- regmatches(raw, m)[[1]]
+  if (length(parts) < 3) return(NULL)
+
+  fn <- parts[[2]]
+  args <- parts[[3]]
+
+  if (!fn %in% c("starts_with", "ends_with", "matches", "contains")) return(NULL)
+
+  q <- regexec("(['\"])(.*?)\\1", args)
+  qparts <- regmatches(args, q)[[1]]
+  if (length(qparts) < 3) return(NULL)
+
+  list(negative = negative, fn = fn, pattern = qparts[[3]], raw = expr)
+}
+
+simple_selector_matches_any <- function(sel, stems) {
+  if (is.null(sel) || isTRUE(sel$negative)) return(FALSE)
+  if (!is.character(stems) || length(stems) == 0) return(FALSE)
+
+  pat <- sel$pattern
+  if (!nzchar(pat)) return(FALSE)
+
+  switch(
+    sel$fn,
+    starts_with = any(startsWith(stems, pat)),
+    ends_with = any(endsWith(stems, pat)),
+    contains = any(grepl(pat, stems, fixed = TRUE)),
+    matches = tryCatch(any(grepl(pat, stems, perl = TRUE)), error = function(e) FALSE),
+    FALSE
+  )
+}
+
 validate_articles <- function(root_dir, cfg, warnings, errors, template_mode = FALSE) {
   articles_cfg <- cfg$articles
   if (is.null(articles_cfg)) return(list(warnings = warnings, errors = errors))
@@ -293,30 +378,70 @@ validate_articles <- function(root_dir, cfg, warnings, errors, template_mode = F
   vignettes_dir <- file.path(root_dir, "vignettes")
   stems <- collect_vignette_stems(vignettes_dir)
   explicit_refs <- extract_explicit_article_refs(articles_cfg)
-
-  if (length(explicit_refs) == 0) return(list(warnings = warnings, errors = errors))
+  sections <- extract_articles_section_info(articles_cfg)
+  has_selectors <- any(vapply(sections, function(x) length(x$selectors) > 0, logical(1)))
 
   if (!dir.exists(vignettes_dir)) {
     if (isTRUE(template_mode)) {
       return(list(warnings = warnings, errors = errors))
     }
-    warnings <- c(
-      warnings,
-      "vignettes/ directory does not exist, but explicit articles are listed in `_pkgdown.yml`."
-    )
+    if (length(explicit_refs) > 0) {
+      warnings <- c(
+        warnings,
+        "vignettes/ directory does not exist, but explicit articles are listed in `_pkgdown.yml`."
+      )
+    }
+    if (has_selectors) {
+      warnings <- c(
+        warnings,
+        "vignettes/ directory does not exist, but `_pkgdown.yml` defines `articles:` selector expressions."
+      )
+    }
     return(list(warnings = warnings, errors = errors))
   }
 
-  missing <- setdiff(explicit_refs, stems)
-  if (length(missing) > 0) {
-    warnings <- c(
-      warnings,
-      paste0(
-        "Some articles referenced in `_pkgdown.yml` do not match files under `vignettes/`: ",
-        paste(missing, collapse = ", "),
-        ". If these are generated elsewhere or renamed, update `_pkgdown.yml` or the filenames."
+  if (length(explicit_refs) > 0) {
+    missing <- setdiff(explicit_refs, stems)
+    if (length(missing) > 0) {
+      warnings <- c(
+        warnings,
+        paste0(
+          "Some articles referenced in `_pkgdown.yml` do not match files under `vignettes/`: ",
+          paste(missing, collapse = ", "),
+          ". If these are generated elsewhere or renamed, update `_pkgdown.yml` or the filenames."
+        )
       )
-    )
+    }
+  }
+
+  if (!isTRUE(template_mode)) {
+    if (has_selectors && length(stems) == 0) {
+      warnings <- c(
+        warnings,
+        "No vignette/article sources found under `vignettes/`, but `_pkgdown.yml` defines `articles:` selectors. Articles groups may be empty."
+      )
+    }
+
+    for (sec in sections) {
+      if (length(sec$selectors) == 0) next
+      if (length(sec$explicit) > 0) next
+
+      parsed <- lapply(sec$selectors, parse_simple_selector)
+      parsed <- parsed[!vapply(parsed, is.null, logical(1))]
+      parsed <- parsed[!vapply(parsed, function(x) isTRUE(x$negative), logical(1))]
+      if (length(parsed) == 0) next
+
+      if (!any(vapply(parsed, simple_selector_matches_any, logical(1), stems = stems))) {
+        warnings <- c(
+          warnings,
+          paste0(
+            "No vignette/article matched selector(s) for `articles:` ",
+            sec$label,
+            ". Check `articles:` contents patterns or filenames under `vignettes/`."
+          )
+        )
+      }
+    }
   }
 
   list(warnings = warnings, errors = errors)
@@ -336,7 +461,10 @@ is_strict_warning <- function(w) {
     "^navbar\\.components is present but not a mapping/list\\.",
     "^`articles:` is present but not a list of sections\\.",
     "^vignettes/ directory does not exist, but explicit articles are listed",
-    "^Some articles referenced in `_pkgdown\\.yml` do not match files under `vignettes/`:"
+    "^vignettes/ directory does not exist, but `_pkgdown\\.yml` defines `articles:` selector expressions\\.",
+    "^Some articles referenced in `_pkgdown\\.yml` do not match files under `vignettes/`:",
+    "^No vignette/article sources found under `vignettes/`, but `_pkgdown\\.yml` defines `articles:` selectors\\.",
+    "^No vignette/article matched selector\\(s\\) for `articles:`"
   )
 
   any(grepl(paste(patterns, collapse = "|"), w))
@@ -363,26 +491,37 @@ main <- function() {
     errors <- c(errors, cfg$.error)
     cfg <- list()
   }
+  cfg_ok <- TRUE
+  if (length(errors) == 0 && !is_yaml_mapping(cfg)) {
+    errors <- c(
+      errors,
+      "Invalid _pkgdown.yml root. Expected a YAML mapping (key: value), e.g. `url: https://.../`."
+    )
+    cfg_ok <- FALSE
+    cfg <- list()
+  }
 
   res <- validate_repo_basics(root_dir, warnings, errors, template_mode = template_mode)
   warnings <- res$warnings
   errors <- res$errors
 
-  res <- validate_url(cfg, warnings, errors)
-  warnings <- res$warnings
-  errors <- res$errors
+  if (isTRUE(cfg_ok)) {
+    res <- validate_url(cfg, warnings, errors)
+    warnings <- res$warnings
+    errors <- res$errors
 
-  res <- validate_template(cfg, warnings, errors)
-  warnings <- res$warnings
-  errors <- res$errors
+    res <- validate_template(cfg, warnings, errors)
+    warnings <- res$warnings
+    errors <- res$errors
 
-  res <- validate_navbar(cfg, warnings, errors)
-  warnings <- res$warnings
-  errors <- res$errors
+    res <- validate_navbar(cfg, warnings, errors)
+    warnings <- res$warnings
+    errors <- res$errors
 
-  res <- validate_articles(root_dir, cfg, warnings, errors, template_mode = template_mode)
-  warnings <- res$warnings
-  errors <- res$errors
+    res <- validate_articles(root_dir, cfg, warnings, errors, template_mode = template_mode)
+    warnings <- res$warnings
+    errors <- res$errors
+  }
 
   strict_promotions <- character()
   if (isTRUE(strict_mode) && length(warnings) > 0) {
@@ -392,6 +531,7 @@ main <- function() {
         errors,
         paste0("[strict] ", strict_promotions)
       )
+      warnings <- warnings[!vapply(warnings, is_strict_warning, logical(1))]
     }
   }
 
@@ -410,12 +550,6 @@ main <- function() {
   if (length(warnings) > 0) {
     cat("Warnings:\n")
     for (w in warnings) cat("  - ", w, "\n", sep = "")
-    cat("\n")
-  }
-
-  if (length(strict_promotions) > 0) {
-    cat("Strict promotions (warning -> error):\n")
-    for (w in strict_promotions) cat("  - ", w, "\n", sep = "")
     cat("\n")
   }
 
