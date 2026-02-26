@@ -309,6 +309,7 @@ Fix:
 - promote stable articles to vignettes only when needed
 - maintain News for releases
 - periodically review navbar and article grouping as guides grow
+- after renaming/removing pages, run `scripts/clean_and_build.R` to clear stale site artifacts
 
 ## Recommended Validation Order
 
@@ -329,3 +330,4 @@ Before deploy/release, use checks in this order:
 - templates: `assets/templates/`
 - preflight scripts: `scripts/check_pkgdown_ready.R`, `scripts/validate_pkgdown_config.R`, `scripts/check_pkgdown_builtin.R`, and optionally `scripts/check_tutorial_urls.R`
 - visual identity helper: `scripts/setup_favicons.R`
+- rebuild helper for renamed routes/pages: `scripts/clean_and_build.R`

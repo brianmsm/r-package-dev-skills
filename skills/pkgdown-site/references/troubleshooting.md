@@ -285,6 +285,23 @@ Fix:
 - fix deploy failures
 - wait briefly, then refresh
 
+### Symptom: Removed or renamed pages still appear
+
+Likely causes:
+
+- stale files remain in rendered site output
+- routes changed but old artifacts were never cleaned
+
+Checks:
+
+- confirm file was actually renamed/removed in source
+- inspect generated output for old HTML paths
+
+Fix:
+
+- run `pkgdown::clean_site()` then rebuild
+- or use `scripts/clean_and_build.R` for a clean rebuild
+
 ### Symptom: Custom domain or CNAME issues
 
 Likely causes:
@@ -413,3 +430,4 @@ Then reintroduce complexity gradually (grouped articles, theme customizations, e
 - config templates: `assets/templates/`
 - preflight scripts: `scripts/validate_pkgdown_config.R`, `scripts/check_pkgdown_ready.R`, `scripts/check_pkgdown_builtin.R`, and optionally `scripts/check_tutorial_urls.R`
 - visual identity helper: `scripts/setup_favicons.R`
+- rebuild helper for stale/orphan pages: `scripts/clean_and_build.R`
