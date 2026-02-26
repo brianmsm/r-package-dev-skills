@@ -289,10 +289,18 @@ Fix:
 - maintain News for releases
 - periodically review navbar and article grouping as guides grow
 
+## Recommended Validation Order
+
+Before deploy/release, use checks in this order:
+
+1. `scripts/validate_pkgdown_config.R` as a fast lint pass (`--strict` in CI when desired)
+2. `scripts/check_pkgdown_builtin.R` as pkgdown-native validation (`check_pkgdown()` and `pkgdown_sitrep()`)
+3. `pkgdown::build_site()` locally for final visual verification
+
 ## Internal Cross-References
 
 - content split strategy: `references/content-architecture.md`
 - packages in growth: `references/package-in-growth.md`
 - deploy/build issues: `references/troubleshooting.md`
 - templates: `assets/templates/`
-- preflight scripts: `scripts/check_pkgdown_ready.R` and `scripts/validate_pkgdown_config.R`
+- preflight scripts: `scripts/check_pkgdown_ready.R`, `scripts/validate_pkgdown_config.R`, and `scripts/check_pkgdown_builtin.R`

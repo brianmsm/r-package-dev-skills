@@ -367,6 +367,7 @@ When reporting or debugging, include:
 - repository structure for key files
 - output of `scripts/validate_pkgdown_config.R`
 - output of `scripts/check_pkgdown_ready.R`
+- output of `scripts/check_pkgdown_builtin.R`
 
 ## Minimal Get-Back-To-Green Recipe
 
@@ -387,4 +388,4 @@ Then reintroduce complexity gradually (grouped articles, theme customizations, e
 - content placement rules: `references/content-architecture.md`
 - growing package strategy: `references/package-in-growth.md`
 - config templates: `assets/templates/`
-- preflight scripts: `scripts/validate_pkgdown_config.R` and `scripts/check_pkgdown_ready.R`
+- preflight scripts: `scripts/validate_pkgdown_config.R`, `scripts/check_pkgdown_ready.R`, and `scripts/check_pkgdown_builtin.R`

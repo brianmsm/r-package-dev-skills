@@ -11,6 +11,7 @@
 #   Rscript scripts/validate_pkgdown_config.R
 #   Rscript scripts/validate_pkgdown_config.R path/to/_pkgdown.yml
 #   Rscript scripts/validate_pkgdown_config.R path/to/_pkgdown.yml --template-mode
+#   Rscript scripts/validate_pkgdown_config.R path/to/_pkgdown.yml --strict
 #
 # Exit codes:
 #   0: OK (no errors; warnings may exist)
@@ -41,12 +42,14 @@ print_usage <- function() {
   cat("  Rscript scripts/validate_pkgdown_config.R path/to/_pkgdown.yml\n")
   cat("  Rscript scripts/validate_pkgdown_config.R path/to/_pkgdown.yml --template-mode\n")
   cat("  Rscript scripts/validate_pkgdown_config.R --template-mode=true\n")
+  cat("  Rscript scripts/validate_pkgdown_config.R --strict\n")
 }
 
 parse_cli_args <- function(args) {
   cfg_path <- "_pkgdown.yml"
   cfg_set <- FALSE
   template_mode <- FALSE
+  strict_mode <- FALSE
 
   for (arg in args) {
     if (arg %in% c("-h", "--help")) {
@@ -64,6 +67,16 @@ parse_cli_args <- function(args) {
       next
     }
 
+    if (arg == "--strict") {
+      strict_mode <- TRUE
+      next
+    }
+
+    if (grepl("^--strict=", arg)) {
+      strict_mode <- as_bool(sub("^--strict=", "", arg))
+      next
+    }
+
     if (startsWith(arg, "--")) {
       stop(sprintf("Unknown argument: %s", arg), call. = FALSE)
     }
@@ -75,7 +88,7 @@ parse_cli_args <- function(args) {
     cfg_set <- TRUE
   }
 
-  list(cfg_path = cfg_path, template_mode = template_mode)
+  list(cfg_path = cfg_path, template_mode = template_mode, strict_mode = strict_mode)
 }
 
 as_chr <- function(x) {
@@ -309,10 +322,31 @@ validate_articles <- function(root_dir, cfg, warnings, errors, template_mode = F
   list(warnings = warnings, errors = errors)
 }
 
+is_strict_warning <- function(w) {
+  if (!is.character(w) || length(w) != 1) return(FALSE)
+
+  patterns <- c(
+    "^No `url:` found in _pkgdown\\.yml\\.",
+    "^`url` does not look like an http\\(s\\) URL:",
+    "^`url` has multiple values;",
+    "^No pkgdown home source found \\(",
+    "^`template:` is present but not a mapping/list\\.",
+    "^`navbar:` is present but not a mapping/list\\.",
+    "^navbar\\.structure is not a mapping/list\\.",
+    "^navbar\\.components is present but not a mapping/list\\.",
+    "^`articles:` is present but not a list of sections\\.",
+    "^vignettes/ directory does not exist, but explicit articles are listed",
+    "^Some articles referenced in `_pkgdown\\.yml` do not match files under `vignettes/`:"
+  )
+
+  any(grepl(paste(patterns, collapse = "|"), w))
+}
+
 main <- function() {
   cli <- parse_cli_args(commandArgs(trailingOnly = TRUE))
   cfg_path <- cli$cfg_path
   template_mode <- cli$template_mode
+  strict_mode <- cli$strict_mode
 
   cfg_path_abs <- normalizePath(cfg_path, winslash = "/", mustWork = FALSE)
   root_dir <- normalizePath(dirname(cfg_path_abs), winslash = "/", mustWork = FALSE)
@@ -350,10 +384,22 @@ main <- function() {
   warnings <- res$warnings
   errors <- res$errors
 
+  strict_promotions <- character()
+  if (isTRUE(strict_mode) && length(warnings) > 0) {
+    strict_promotions <- warnings[vapply(warnings, is_strict_warning, logical(1))]
+    if (length(strict_promotions) > 0) {
+      errors <- c(
+        errors,
+        paste0("[strict] ", strict_promotions)
+      )
+    }
+  }
+
   cat("\n== pkgdown config validation ==\n")
   cat("Config:", cfg_path_abs, "\n")
   cat("Root:  ", root_dir, "\n\n")
   cat("Mode:  ", if (template_mode) "template" else "package", "\n\n")
+  cat("Strict:", if (strict_mode) "ON" else "OFF", "\n\n")
 
   if (length(errors) > 0) {
     cat("Errors:\n")
@@ -364,6 +410,12 @@ main <- function() {
   if (length(warnings) > 0) {
     cat("Warnings:\n")
     for (w in warnings) cat("  - ", w, "\n", sep = "")
+    cat("\n")
+  }
+
+  if (length(strict_promotions) > 0) {
+    cat("Strict promotions (warning -> error):\n")
+    for (w in strict_promotions) cat("  - ", w, "\n", sep = "")
     cat("\n")
   }
 
