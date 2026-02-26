@@ -13,18 +13,14 @@ template:
 
 navbar:
   structure:
+    # Default:
     left:  [intro, reference, articles, news]
+    # If you embed hosted tutorials, replace the `left:` line above with:
+    # left:  [intro, reference, articles, tutorials, news]
     right: [search, github]
 
-# Optional tutorials tab (only if tutorials are configured/hosted):
-# navbar:
-#   structure:
-#     left:  [intro, reference, articles, tutorials, news]
-#     right: [search, github]
-
-# Optional explicit GitHub component:
-# navbar:
-#   components:
-#     github:
-#       icon: fa-github
-#       href: https://github.com/<user-or-org>/<repo>
+  # Optional explicit GitHub component (if not auto-detected):
+  # components:
+  #   github:
+  #     icon: fa-github
+  #     href: https://github.com/<user-or-org>/<repo>

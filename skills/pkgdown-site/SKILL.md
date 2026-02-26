@@ -119,18 +119,8 @@ Open only what is needed:
 
 ## Package In Growth Module
 
-Prioritize this module when:
-
-- README is large and hard to scan
-- core API is still changing
-- no stable vignette set exists yet
-
-Recommended approach:
-
-1. Keep README to quick-start essentials.
-2. Add `index.md` for website home narrative.
-3. Use website-only articles for evolving content.
-4. Promote only stable guides to formal vignettes later.
+If the package is actively evolving and the README is oversized, follow the playbook in
+`references/package-in-growth.md` (lean README -> index.md -> web-only articles -> stable vignettes).
 
 ## Execution Protocol
 

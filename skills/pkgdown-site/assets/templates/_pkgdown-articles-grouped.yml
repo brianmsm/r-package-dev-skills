@@ -22,31 +22,21 @@ template:
 
 navbar:
   structure:
+    # Default:
     left:  [intro, reference, articles, news]
+    # If you prefer "Get started" to appear under Articles (not top-level),
+    # replace the `left:` line above with:
+    # left:  [reference, articles, news]
+    #
+    # If you embed hosted tutorials, replace the `left:` line above with:
+    # left:  [intro, reference, articles, tutorials, news]
     right: [search, github]
 
-# OPTIONAL VARIANT:
-# If you prefer "Get started" to appear under Articles (not top-level),
-# remove `intro` from the navbar structure above, and then include your
-# package-named article in the first section below.
-#
-# navbar:
-#   structure:
-#     left:  [reference, articles, news]
-#     right: [search, github]
-#
-# Optional tutorials tab:
-# navbar:
-#   structure:
-#     left:  [intro, reference, articles, tutorials, news]
-#     right: [search, github]
-
-# Optional explicit GitHub component:
-# navbar:
-#   components:
-#     github:
-#       icon: fa-github
-#       href: https://github.com/<user-or-org>/<repo>
+  # Optional explicit GitHub component (if not auto-detected):
+  # components:
+  #   github:
+  #     icon: fa-github
+  #     href: https://github.com/<user-or-org>/<repo>
 
 articles:
   - title: Workflows

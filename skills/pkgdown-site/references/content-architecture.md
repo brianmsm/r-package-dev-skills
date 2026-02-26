@@ -230,6 +230,9 @@ When README is too large, migrate in this order:
 4. multiple long examples -> articles, keep one minimal example in README
 5. expanded narrative -> site home
 
+Optional tool: run `scripts/audit_readme_for_migration.R` to generate a section-by-section
+migration report for the current README.
+
 ## Common Pitfalls
 
 1. README becomes the entire manual.
