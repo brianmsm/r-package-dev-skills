@@ -11,6 +11,7 @@
 #   Example: vignettes/pizza/slice.Rmd -> pizza/slice
 # - A vignette with the same name as the package becomes a top-level "Get started" link by default.
 #   If you want "Get started" inside Articles instead, see the optional variant below.
+# - Tutorials are optional. Add `tutorials` to navbar only if tutorials are configured/hosted.
 
 url: https://<user-or-org>.github.io/<repo>/
 
@@ -19,7 +20,7 @@ template:
 
 navbar:
   structure:
-    left:  [intro, reference, articles, tutorials, news]
+    left:  [intro, reference, articles, news]
     right: [search, github]
 
 # OPTIONAL VARIANT:
@@ -29,7 +30,13 @@ navbar:
 #
 # navbar:
 #   structure:
-#     left:  [reference, articles, tutorials, news]
+#     left:  [reference, articles, news]
+#     right: [search, github]
+#
+# Optional tutorials tab:
+# navbar:
+#   structure:
+#     left:  [intro, reference, articles, tutorials, news]
 #     right: [search, github]
 
 # Optional explicit GitHub component:

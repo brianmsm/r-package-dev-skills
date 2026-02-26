@@ -388,6 +388,7 @@ When reporting or debugging, include:
 - output of `scripts/validate_pkgdown_config.R`
 - output of `scripts/check_pkgdown_ready.R`
 - output of `scripts/check_pkgdown_builtin.R`
+- output of `scripts/check_tutorial_urls.R` (when tutorials are configured)
 
 ## Minimal Get-Back-To-Green Recipe
 
@@ -407,6 +408,7 @@ Then reintroduce complexity gradually (grouped articles, theme customizations, e
 - setup and publish flow: `references/pkgdown-flow.md`
 - content placement rules: `references/content-architecture.md`
 - growing package strategy: `references/package-in-growth.md`
+- learnr/tutorial embedding: `references/tutorials.md`
 - config templates: `assets/templates/`
-- preflight scripts: `scripts/validate_pkgdown_config.R`, `scripts/check_pkgdown_ready.R`, and `scripts/check_pkgdown_builtin.R`
+- preflight scripts: `scripts/validate_pkgdown_config.R`, `scripts/check_pkgdown_ready.R`, `scripts/check_pkgdown_builtin.R`, and optionally `scripts/check_tutorial_urls.R`
 - visual identity helper: `scripts/setup_favicons.R`

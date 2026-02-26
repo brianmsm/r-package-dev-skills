@@ -1,6 +1,6 @@
 # Content Architecture For pkgdown Sites
 
-Use this guide to decide where content should live across README, site home, reference, articles, vignettes, and news.
+Use this guide to decide where content should live across README, site home, reference, articles, vignettes, tutorials, and news.
 
 The goal is to keep docs discoverable, maintainable, and aligned with how users navigate package websites.
 
@@ -15,6 +15,7 @@ Each docs surface has a primary job:
 - reference: function-level docs from `.Rd`
 - articles: task-oriented workflows
 - vignettes: stable long-form guides shipped with the package
+- tutorials: embedded interactive guides hosted externally (optional)
 - news: release-oriented user-facing changes
 - contributor docs: developer workflows, not end-user onboarding
 
@@ -23,7 +24,7 @@ Each docs surface has a primary job:
 Think in layers:
 
 1. entry points: README and site home
-2. how-to guidance: articles and vignettes
+2. how-to guidance: articles, vignettes, and optional tutorials
 3. API lookup: reference
 4. change communication: news
 5. developer corner: contributor and internal docs
@@ -103,6 +104,17 @@ Progression guideline:
 
 - start with articles while APIs evolve
 - promote stable articles to vignettes later
+
+### Tutorials
+
+Use tutorials when you need interactive `learnr`-style training hosted outside pkgdown.
+
+Key distinction:
+
+- pkgdown can embed tutorials
+- pkgdown does not run/host tutorial apps
+
+Use tutorials sparingly and keep static alternatives (articles/reference) available.
 
 ### News
 
@@ -244,3 +256,4 @@ When README is too large, migrate in this order:
 For active-development packages with oversized README, also use:
 
 - `references/package-in-growth.md`
+- `references/tutorials.md` (if interactive learnr content is part of the docs strategy)

@@ -113,6 +113,7 @@ Open only what is needed:
 - content split and doc ownership: `references/content-architecture.md`
 - active-development strategy: `references/package-in-growth.md`
 - deploy and build failures: `references/troubleshooting.md`
+- learnr/tutorial embedding strategy: `references/tutorials.md`
 - style options and naming patterns: `references/examples-notes.md`
 
 ## Package In Growth Module

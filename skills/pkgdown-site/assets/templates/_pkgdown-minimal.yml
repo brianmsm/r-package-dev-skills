@@ -3,7 +3,7 @@
 #
 # Notes:
 # - Replace <user-or-org> and <repo> with your actual GitHub user/org and repo name.
-# - This navbar mirrors pkgdown's documented default structure; remove "tutorials" if you don't use them.
+# - Tutorials are optional. Keep `tutorials` in navbar only if you define/host tutorials.
 # - If GitHub is not auto-detected, define it explicitly under navbar.components.github.
 
 url: https://<user-or-org>.github.io/<repo>/
@@ -13,8 +13,14 @@ template:
 
 navbar:
   structure:
-    left:  [intro, reference, articles, tutorials, news]
+    left:  [intro, reference, articles, news]
     right: [search, github]
+
+# Optional tutorials tab (only if tutorials are configured/hosted):
+# navbar:
+#   structure:
+#     left:  [intro, reference, articles, tutorials, news]
+#     right: [search, github]
 
 # Optional explicit GitHub component:
 # navbar:

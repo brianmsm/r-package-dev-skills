@@ -4,6 +4,12 @@
 # Based on the recommended r-lib/actions v2 example (deploy to gh-pages).
 # This workflow builds the site into `docs/` and deploys it to the `gh-pages` branch.
 #
+# Optional hardening:
+# - If you vendor this skill's scripts into your package repo, you can run:
+#   - scripts/validate_pkgdown_config.R (fast lint; supports --strict)
+#   - scripts/check_pkgdown_builtin.R (pkgdown-native diagnostics)
+#   - scripts/check_tutorial_urls.R (only relevant when `tutorials:` is configured)
+#
 # Notes:
 # - Ensure GitHub Actions has permission to write to the repo:
 #   Settings -> Actions -> General -> Workflow permissions -> "Read and write permissions".
@@ -59,6 +65,21 @@ jobs:
           needs: website
           # Optional: force Quarto install (usually not necessary; can be auto-detected)
           # install-quarto: true
+
+      # Optional preflight checks.
+      # These run only if the corresponding script exists in the target repository.
+      # If you use check_tutorial_urls.R, add any::yaml and any::httr2 to extra-packages above.
+      - name: Validate pkgdown config (custom)
+        if: hashFiles('scripts/validate_pkgdown_config.R') != ''
+        run: Rscript scripts/validate_pkgdown_config.R --strict
+
+      - name: pkgdown diagnostics (built-in)
+        if: hashFiles('scripts/check_pkgdown_builtin.R') != ''
+        run: Rscript scripts/check_pkgdown_builtin.R . --check-only
+
+      - name: Check tutorial URLs (optional)
+        if: hashFiles('scripts/check_tutorial_urls.R') != ''
+        run: Rscript scripts/check_tutorial_urls.R _pkgdown.yml
 
       - name: Build site
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
