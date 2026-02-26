@@ -67,11 +67,13 @@ Likely causes:
 - pkgdown is using a different home source
 - browser or Pages caching
 - multiple competing files (`README.md`, `index.md`, `pkgdown/index.md`)
+- stale markdown generated from `README.Rmd` or `index.Rmd`
 
 Start with:
 
 - identify which file is used for home
 - confirm latest deploy run completed
+- if you edit `README.Rmd` or `index.Rmd`, confirm the corresponding `.md` is up to date
 
 ## Build Problems
 
@@ -138,6 +140,44 @@ Fix:
 
 - create `index.md` (recommended for growing package)
 - rebuild
+
+### Symptom: Home page does not reflect changes when you edit README.Rmd or index.Rmd
+
+Likely causes:
+
+- pkgdown does not knit home-page `.Rmd` sources
+- `README.md` / `index.md` is stale relative to the `.Rmd`
+
+Checks:
+
+- do you edit `README.Rmd` but the site uses `README.md`?
+- do you edit `index.Rmd` but the site uses `index.md`?
+- compare `git diff` and file timestamps for the `.md`
+
+Fix:
+
+- knit/render `README.Rmd` -> `README.md`
+- knit/render `index.Rmd` -> `index.md`
+- rebuild and redeploy
+
+### Symptom: Images are missing on the home page (README/index)
+
+Likely causes:
+
+- images are not stored inside the package sources
+- image paths are not valid in the pkgdown build context
+
+Checks:
+
+- are images referenced with stable relative paths?
+- are README images stored in `man/figures/` (recommended)?
+- if you generate figures via R Markdown, is `fig.path` set to `man/figures/`?
+
+Fix:
+
+- move images under `man/figures/` and update paths
+- set `knitr::opts_chunk$set(fig.path = \"man/figures/\")` for generated figures
+- rebuild and redeploy
 
 ### Symptom: Articles do not show up
 

@@ -40,6 +40,12 @@ Key idea: use local builds for iteration, and use CI for publishing.
 - If you use Quarto (`.qmd`) articles or vignettes:
 - Quarto available locally (CI can install it if configured)
 
+### If you use README.Rmd or index.Rmd
+
+pkgdown builds the home page from markdown files. If you maintain `README.Rmd` or `index.Rmd`,
+you must knit/render them to `README.md` / `index.md` yourself, and commit the generated `.md`.
+pkgdown does not knit these home-page sources for you.
+
 ## Recommended Setup Flow (GitHub Pages + Actions)
 
 ### Step 1: Initialize pkgdown configuration
@@ -83,6 +89,7 @@ Common patterns:
 Checks:
 
 - at least one home source exists: `pkgdown/index.md`, `index.md`, or `README.md`
+- if you maintain `README.Rmd` or `index.Rmd`, confirm the corresponding `.md` is up to date
 
 ### Step 2b (optional): Add visual identity (logo + favicons)
 
@@ -186,6 +193,8 @@ Checks:
 - `NEWS.md`: release notes shown as News
 - `logo.svg`/`logo.png` or `man/figures/logo.*`: package logo used for visual identity
 - `pkgdown/favicon/`: generated favicon assets consumed by site builds
+- extra `.md` files in repo root or `.github/` (for example `ROADMAP.md`, `.github/CODE_OF_CONDUCT.md`):
+  copied into the built site and converted to HTML
 - `.github/workflows/pkgdown.yaml`: CI build plus deploy
 
 ## Articles, Vignettes, and Get Started
@@ -205,6 +214,8 @@ Checks:
 
 - a vignette or article named after the package commonly becomes Get started
 - keep it short, stable, and beginner-friendly
+- if your package name includes a `.`, use a `-` in the vignette name (for example `pack.down` ->
+  `pack-down.qmd`) to match pkgdown's Get started convention
 
 ## Suggested Verification Checklist
 

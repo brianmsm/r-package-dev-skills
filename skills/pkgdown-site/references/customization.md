@@ -153,7 +153,57 @@ footer:
 
 ### Homepage Sidebar and Home Behavior
 
-Home behavior is configured separately from navbar decisions. For deeper home-page tuning, review `build_home()` docs and keep those changes isolated from global navigation changes.
+Home behavior is configured separately from navbar decisions. High-impact home tuning typically happens under `home:` in `_pkgdown.yml`.
+
+### Home Metadata: Title and Description
+
+By default, pkgdown derives page title and description from `DESCRIPTION`. It is often worth overriding these for better search-engine and landing-page clarity:
+
+```yaml
+home:
+  title: "An R package for <short searchable topic>"
+  description: >
+    One paragraph describing what the package does and why it exists.
+    Keep it plain and user-facing.
+```
+
+### Home Links
+
+Curate the home sidebar links so users can find the next steps quickly:
+
+```yaml
+home:
+  links:
+    - text: Roadmap
+      href: ROADMAP.html
+    - text: Changelog
+      href: news/index.html
+```
+
+Tip: pkgdown also auto-populates links from `DESCRIPTION` fields like `URL` and `BugReports`.
+
+### Home Sidebar Structure
+
+This is the default sidebar structure:
+
+```yaml
+home:
+  sidebar:
+    structure: [links, license, community, citation, authors, dev]
+```
+
+You can remove the sidebar entirely:
+
+```yaml
+home:
+  sidebar: FALSE
+```
+
+Guidance:
+
+- keep the sidebar short
+- prefer a few curated links over many sections
+- treat sidebar changes as home-page concerns (avoid mixing with navbar decisions)
 
 ## Additional HTML and Files
 

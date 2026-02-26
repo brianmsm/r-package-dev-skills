@@ -41,6 +41,14 @@ Keep:
 - short project status
 - links to website and key guides
 
+Notes:
+
+- If you maintain `README.Rmd`, keep `README.md` up to date and committed. pkgdown uses
+  `README.md` for the website home (when selected) and does not knit `README.Rmd` for you.
+- If you include images in `README.md`, store them inside the package (commonly `man/figures/`)
+  and use stable relative paths. If you generate figures via R Markdown, set `fig.path` to
+  `man/figures/` so images land in the right place.
+
 Avoid:
 
 - long tutorials
@@ -64,6 +72,11 @@ Avoid:
 - large code dumps
 - complete tutorials
 - function-by-function listings
+
+Notes:
+
+- If you maintain `index.Rmd`, keep `index.md` up to date and committed. pkgdown does not knit
+  `index.Rmd` for the home page.
 
 ### Reference
 
