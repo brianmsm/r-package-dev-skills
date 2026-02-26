@@ -25,6 +25,11 @@ template:
 #   title: "An R package for <short searchable topic>"
 #   description: >
 #     One paragraph describing what the package does and why it exists.
+#   links:
+#     - text: Roadmap
+#       href: ROADMAP.html
+#     - text: Changelog
+#       href: news/index.html
 
 navbar:
   structure:
