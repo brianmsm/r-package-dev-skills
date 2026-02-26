@@ -1,144 +1,390 @@
-# Troubleshooting
+# pkgdown Troubleshooting
 
-Use this page for common `pkgdown` failure patterns.
+This reference is a practical checklist of common pkgdown failures and how to diagnose and fix them. It focuses on issues that typically occur when building or publishing a pkgdown site with GitHub Pages and GitHub Actions.
 
-## Home Page Does Not Change
+Use this file when:
 
-Symptom:
+- the site is not updating
+- you get a 404
+- the deploy is empty
+- the navbar breaks
+- articles do not appear
+- CI succeeds locally but fails in GitHub Actions
 
-- site home still shows old README content
+## Quick Triage: Identify the Failure Class
 
-Likely cause:
+### 1) Build failure
 
-- `index.md` not in expected location or not committed
+Symptoms:
 
-Verify:
+- `pkgdown::build_site()` fails locally
+- CI build step fails with R errors
 
-- check `pkgdown/index.md` and `index.md`
-- rebuild locally and inspect generated home page
+Likely causes:
+
+- missing R package dependencies
+- invalid YAML
+- broken vignette or article build
+- missing system libraries
+
+Start with:
+
+- run local build
+- validate `_pkgdown.yml`
+- check vignette and article sources under `vignettes/`
+
+### 2) Deploy failure
+
+Symptoms:
+
+- build succeeds but site is not published
+- `gh-pages` branch not updated
+- GitHub Pages shows 404
+
+Likely causes:
+
+- workflow permissions insufficient
+- GitHub Pages source misconfigured
+- wrong deploy folder (for example `docs` missing)
+- deploy step not running (PR builds only)
+
+Start with:
+
+- check Actions run logs
+- check Pages settings
+- confirm deploy step condition
+
+### 3) Wrong-content failure
+
+Symptoms:
+
+- home page is not what you expect
+- navbar not showing your changes
+- older content persists
+
+Likely causes:
+
+- pkgdown is using a different home source
+- browser or Pages caching
+- multiple competing files (`README.md`, `index.md`, `pkgdown/index.md`)
+
+Start with:
+
+- identify which file is used for home
+- confirm latest deploy run completed
+
+## Build Problems
+
+### Symptom: `_pkgdown.yml` YAML parse error
+
+Typical messages:
+
+- mapping values are not allowed here
+- did not find expected key
+- found character that cannot start any token
+
+Likely causes:
+
+- indentation error
+- tabs instead of spaces
+- unquoted colon in text
+- mixed list and mapping structure
+
+Checks:
+
+- validate YAML with parser (`yaml::yaml.load_file("_pkgdown.yml")`)
+- confirm consistent indentation (2 spaces is typical)
+- ensure lists use `- item` correctly
 
 Fix:
 
-- add or update home source file
+- correct indentation and list structure
+- quote strings with `:` or special characters
+
+### Symptom: Reference pages missing or incomplete
+
+Likely causes:
+
+- functions not documented with roxygen2
+- `devtools::document()` not run
+- exports not set (`@export` missing)
+
+Checks:
+
+- `.Rd` files exist in `man/`
+- `NAMESPACE` includes expected exports
+
+Fix:
+
+- run `devtools::document()`
+- ensure exported functions use roxygen `@export`
+- rebuild site
+
+### Symptom: Home page is empty or not found
+
+Likely causes:
+
+- no home source exists
+- home source exists but is invalid markdown
+
+Checks:
+
+- one of the following exists:
+- `pkgdown/index.md`
+- `index.md`
+- `README.md`
+
+Fix:
+
+- create `index.md` (recommended for growing package)
+- rebuild
+
+### Symptom: Articles do not show up
+
+Likely causes:
+
+- no `.Rmd`/`.qmd` sources in `vignettes/`
+- `_pkgdown.yml` `articles:` selectors or names do not match file stems
+- Quarto not installed (for `.qmd`)
+- vignette build fails and output is skipped
+
+Checks:
+
+- list files in `vignettes/`
+- compare file stems to `_pkgdown.yml` `articles:` `contents`
+- example: `vignettes/workflows-cfa.qmd` -> `workflows-cfa`
+- build locally and inspect warnings
+
+Fix:
+
+- add article sources under `vignettes/`
+- update `_pkgdown.yml` contents to match stems
+- install Quarto or configure CI to install it
+
+### Symptom: Quarto `.qmd` renders locally but fails in CI
+
+Likely causes:
+
+- Quarto not installed in CI
+- missing Pandoc
+- missing external system dependencies
+
+Checks:
+
+- CI logs include `quarto: command not found`
+- workflow includes Pandoc setup and Quarto installation path
+
+Fix:
+
+- install Quarto in CI (or enable `install-quarto` in dependency step)
+- ensure `setup-pandoc` is present
+- add missing system dependencies if required
+
+### Symptom: Site builds but looks unstyled or layout is broken
+
+Likely causes:
+
+- template misconfiguration
+- custom CSS references wrong paths
+- browser caching
+
+Checks:
+
+- remove custom overrides temporarily
+- hard refresh browser
+- check generated HTML asset paths
+
+Fix:
+
+- start from minimal `_pkgdown.yml` and reintroduce customization gradually
+- ensure custom assets are in correct locations
+
+## Deploy and GitHub Pages Problems
+
+### Symptom: GitHub Pages shows 404
+
+Likely causes:
+
+- Pages source not configured
+- site published to different URL than expected
+- deploy step not running
+- `gh-pages` missing or empty
+
+Checks:
+
+- repository Settings -> Pages source is correct:
+- `gh-pages` and `/ (root)` for Pattern A, or
+- default branch and `/docs` for Pattern B
+- latest Actions run succeeded
+- `gh-pages` contains site files
+
+Fix:
+
+- correct Pages source
+- trigger deploy by pushing to default branch
+- ensure workflow has `contents: write`
+
+### Symptom: `gh-pages` exists but has no website files
+
+Likely causes:
+
+- deploy step did not run
+- workflow lacks permission to push
+- deploy folder not found (`docs/` not created)
+
+Checks:
+
+- Actions logs show Build step and Deploy step status
+- Deploy skipped due to PR condition
+- `docs/` exists at end of build step
+
+Fix:
+
+- ensure deploy step runs on pushes to default branch
+- ensure job has `permissions: contents: write`
+- ensure build outputs to `docs/` (or adjust deploy folder)
+
+### Symptom: Site does not update after push
+
+Likely causes:
+
+- build did not run
+- build ran but deploy failed
+- cache delay (Pages/browser)
+- pushed to branch not watched by workflow
+
+Checks:
+
+- Actions tab has a run for latest push
+- compare source commit SHA with latest `gh-pages` commit
+- hard refresh or test in private window
+
+Fix:
+
+- ensure workflow triggers on active default branch
+- fix deploy failures
+- wait briefly, then refresh
+
+### Symptom: Custom domain or CNAME issues
+
+Likely causes:
+
+- `CNAME` not present or overwritten
+- Pages domain not configured
+
+Checks:
+
+- `gh-pages` includes `CNAME`
+- domain configured in Pages settings
+
+Fix:
+
+- configure domain in Pages settings
+- ensure workflow preserves or writes `CNAME`
+
+## Wrong Content and Configuration Confusion
+
+### Symptom: Home page content is not expected
+
+Likely causes:
+
+- multiple home candidates exist and a higher-priority one is used
+- you edited README while site uses `index.md` or `pkgdown/index.md`
+
+Checks:
+
+- does `pkgdown/index.md` exist
+- does root `index.md` exist
+- does `README.md` exist
+
+Fix:
+
+- decide one authoritative home source
+- remove or align competing sources
 - rebuild and redeploy
 
-## Article Does Not Appear
+### Symptom: Navbar changes are ignored
 
-Symptom:
+Likely causes:
 
-- article file exists but is missing in site
+- editing wrong branch (for example `gh-pages` instead of default branch)
+- YAML invalid and defaults applied
+- caching
 
-Likely cause:
+Checks:
 
-- article not indexed in `_pkgdown.yml` or build failed
-
-Verify:
-
-- run local article build
-- inspect `_pkgdown.yml` `articles` section
-
-Fix:
-
-- add article to article index or naming pattern
-- rebuild and confirm article HTML exists
-
-## Broken Navbar
-
-Symptom:
-
-- menu missing or malformed
-
-Likely cause:
-
-- invalid YAML indentation or broken component references
-
-Verify:
-
-- validate YAML parsing
-- compare navbar structure items with components
+- changes committed on default/source branch
+- `_pkgdown.yml` validates
+- site rebuild and redeploy completed
 
 Fix:
 
-- correct indentation and keys
-- remove invalid menu entries
+- edit configuration only in source branch
+- redeploy site from CI
 
-## Deploy Returns 404
+### Symptom: Articles index exists but dropdown is not grouped
 
-Symptom:
+Likely causes:
 
-- published URL returns 404
+- `articles:` groups defined but navbar not configured for grouping
+- missing `navbar` fields in article sections
+- malformed `articles:` structure
 
-Likely cause:
+Checks:
 
-- no successful deploy, wrong Pages source, or wrong URL
-
-Verify:
-
-- inspect latest workflow run
-- inspect GitHub Pages configuration
-- check `gh-pages` branch exists and has HTML
-
-Fix:
-
-- fix workflow and permissions
-- redeploy
-- align configured URL with actual repo site URL
-
-## gh-pages Branch Is Empty
-
-Symptom:
-
-- branch exists but no useful site output
-
-Likely cause:
-
-- build step failed before deploy
-- deploy path points to wrong directory
-
-Verify:
-
-- inspect workflow logs for build errors
-- inspect deploy step input and output
+- `_pkgdown.yml` `articles:` entries include:
+- `title`
+- `contents`
+- optional `navbar`
 
 Fix:
 
-- fix build dependencies and config
-- rerun workflow after commit
+- add `navbar:` labels per section when you want grouped dropdown labels
+- rebuild
 
-## README And Home Duplicate Content
+## Common CI Dependency Issues
 
-Symptom:
+### Missing system dependencies
 
-- home and README are nearly identical and too long
+Symptoms:
 
-Likely cause:
+- package install failures during CI compile
+- errors about missing headers or libraries
 
-- no content boundary strategy
+Fix pattern:
 
-Verify:
+- install required Ubuntu system packages before `setup-r-dependencies`
+- examples: `libcurl4-openssl-dev`, `libssl-dev`, `libxml2-dev`, `libgit2-dev`
 
-- compare README and home sections side by side
+Add only what your dependencies require.
 
-Fix:
+## Recommended Diagnostic Artifacts for Issues
 
-- keep README lean
-- move long sections to home and articles
+When reporting or debugging, include:
 
-## `_pkgdown.yml` Parse Errors
+- Actions log excerpt (build plus deploy)
+- `_pkgdown.yml`
+- repository structure for key files
+- output of `scripts/validate_pkgdown_config.R`
+- output of `scripts/check_pkgdown_ready.R`
 
-Symptom:
+## Minimal Get-Back-To-Green Recipe
 
-- build fails before rendering
+When setup is unstable, reset to a known-good baseline:
 
-Likely cause:
+1. use minimal `_pkgdown.yml`
+2. ensure home exists (`index.md`)
+3. remove complex navbar customization temporarily
+4. build locally
+5. ensure CI installs `pkgdown` and dependencies
+6. deploy to `gh-pages` from `docs/`
 
-- malformed YAML
+Then reintroduce complexity gradually (grouped articles, theme customizations, extra components).
 
-Verify:
+## Internal Cross-References
 
-- parse YAML directly before build
-
-Fix:
-
-- correct syntax and indentation
-- validate again, then rebuild site
+- setup and publish flow: `references/pkgdown-flow.md`
+- content placement rules: `references/content-architecture.md`
+- growing package strategy: `references/package-in-growth.md`
+- config templates: `assets/templates/`
+- preflight scripts: `scripts/validate_pkgdown_config.R` and `scripts/check_pkgdown_ready.R`
