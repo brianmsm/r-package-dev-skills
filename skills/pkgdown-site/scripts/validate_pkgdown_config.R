@@ -102,6 +102,56 @@ is_yaml_mapping <- function(x) {
   is.list(x) && !is.null(names(x)) && length(x) > 0
 }
 
+as_warning_list <- function(x) {
+  if (is.null(x)) return(list())
+  if (is.list(x)) return(x)
+  if (is.character(x)) {
+    # Backward-compatible conversion: treat plain strings as non-strict warnings.
+    return(lapply(x, function(msg) list(code = "legacy", message = msg, strict = FALSE)))
+  }
+  stop("Internal error: warnings must be a list.", call. = FALSE)
+}
+
+strict_warning_codes <- c(
+  "url_missing",
+  "url_not_http",
+  "url_multiple",
+  "home_missing",
+  "template_not_mapping",
+  "navbar_not_mapping",
+  "navbar_structure_not_mapping",
+  "navbar_components_not_mapping",
+  "articles_not_sections",
+  "vignettes_missing_explicit",
+  "vignettes_missing_selectors",
+  "articles_explicit_missing_files",
+  "vignettes_empty_selectors",
+  "articles_selectors_no_match"
+)
+
+is_strict_warning_code <- function(code) {
+  is.character(code) && length(code) == 1 && code %in% strict_warning_codes
+}
+
+new_warning <- function(code, message) {
+  list(
+    code = as.character(code),
+    message = as.character(message),
+    strict = is_strict_warning_code(code)
+  )
+}
+
+add_warning <- function(warnings, code, message) {
+  warnings <- as_warning_list(warnings)
+  warnings[[length(warnings) + 1L]] <- new_warning(code = code, message = message)
+  warnings
+}
+
+warning_messages <- function(warnings) {
+  warnings <- as_warning_list(warnings)
+  vapply(warnings, function(w) as.character(w$message), character(1))
+}
+
 as_scalar_text <- function(x) {
   vals <- as_chr(x)
   vals <- vals[!is.na(vals)]
@@ -161,8 +211,9 @@ validate_repo_basics <- function(root_dir, warnings, errors, template_mode = FAL
     file.path(root_dir, "README.md")
   )
   if (!any(file.exists(home_candidates))) {
-    warnings <- c(
+    warnings <- add_warning(
       warnings,
+      "home_missing",
       "No pkgdown home source found (pkgdown/index.md, index.md, or README.md). The site home may be empty or default."
     )
   }
@@ -176,8 +227,9 @@ validate_url <- function(cfg, warnings, errors) {
   url_vals <- url_vals[!is.na(url_vals)]
 
   if (length(url_vals) == 0 || !nzchar(trimws(url_vals[[1]]))) {
-    warnings <- c(
+    warnings <- add_warning(
       warnings,
+      "url_missing",
       "No `url:` found in _pkgdown.yml. Internal links may be less reliable, and the site URL will not be explicit."
     )
     return(list(warnings = warnings, errors = errors))
@@ -185,14 +237,19 @@ validate_url <- function(cfg, warnings, errors) {
 
   url_scalar <- trimws(as.character(url_vals[[1]]))
   if (!is_http_url(url_scalar)) {
-    warnings <- c(
+    warnings <- add_warning(
       warnings,
+      "url_not_http",
       sprintf("`url` does not look like an http(s) URL: %s", url_scalar)
     )
   }
 
   if (length(url_vals) > 1) {
-    warnings <- c(warnings, "`url` has multiple values; expected a single scalar string.")
+    warnings <- add_warning(
+      warnings,
+      "url_multiple",
+      "`url` has multiple values; expected a single scalar string."
+    )
   }
 
   list(warnings = warnings, errors = errors)
@@ -203,15 +260,20 @@ validate_template <- function(cfg, warnings, errors) {
   if (is.null(tmpl)) return(list(warnings = warnings, errors = errors))
 
   if (!is.list(tmpl)) {
-    warnings <- c(warnings, "`template:` is present but not a mapping/list. Check YAML indentation.")
+    warnings <- add_warning(
+      warnings,
+      "template_not_mapping",
+      "`template:` is present but not a mapping/list. Check YAML indentation."
+    )
     return(list(warnings = warnings, errors = errors))
   }
 
   if (!is.null(tmpl$bootstrap)) {
     bs <- as.character(tmpl$bootstrap[[1]])
     if (nzchar(bs) && bs != "5") {
-      warnings <- c(
+      warnings <- add_warning(
         warnings,
+        "bootstrap_not_5",
         sprintf("template.bootstrap is '%s'. Most modern pkgdown sites use bootstrap: 5.", bs)
       )
     }
@@ -225,18 +287,30 @@ validate_navbar <- function(cfg, warnings, errors) {
   if (is.null(nb)) return(list(warnings = warnings, errors = errors))
 
   if (!is.list(nb)) {
-    warnings <- c(warnings, "`navbar:` is present but not a mapping/list. Check YAML indentation.")
+    warnings <- add_warning(
+      warnings,
+      "navbar_not_mapping",
+      "`navbar:` is present but not a mapping/list. Check YAML indentation."
+    )
     return(list(warnings = warnings, errors = errors))
   }
 
   structure <- nb$structure
   if (is.null(structure)) {
-    warnings <- c(warnings, "navbar.structure is missing. pkgdown will use defaults, but customization may not apply.")
+    warnings <- add_warning(
+      warnings,
+      "navbar_structure_missing",
+      "navbar.structure is missing. pkgdown will use defaults, but customization may not apply."
+    )
     return(list(warnings = warnings, errors = errors))
   }
 
   if (!is.list(structure)) {
-    warnings <- c(warnings, "navbar.structure is not a mapping/list. Check YAML indentation.")
+    warnings <- add_warning(
+      warnings,
+      "navbar_structure_not_mapping",
+      "navbar.structure is not a mapping/list. Check YAML indentation."
+    )
     return(list(warnings = warnings, errors = errors))
   }
 
@@ -244,15 +318,20 @@ validate_navbar <- function(cfg, warnings, errors) {
   right <- as_chr(structure$right)
 
   if (length(left) == 0 && length(right) == 0) {
-    warnings <- c(warnings, "navbar.structure.left and navbar.structure.right are empty. Did you intend that?")
+    warnings <- add_warning(
+      warnings,
+      "navbar_structure_empty",
+      "navbar.structure.left and navbar.structure.right are empty. Did you intend that?"
+    )
   }
 
   known <- c("home", "intro", "reference", "articles", "tutorials", "news", "search", "github")
   all_items <- unique(c(left, right))
   unknown <- setdiff(all_items, known)
   if (length(unknown) > 0) {
-    warnings <- c(
+    warnings <- add_warning(
       warnings,
+      "navbar_unknown_components",
       paste0(
         "navbar.structure contains unknown components: ",
         paste(unknown, collapse = ", "),
@@ -263,7 +342,11 @@ validate_navbar <- function(cfg, warnings, errors) {
 
   comps <- nb$components
   if (!is.null(comps) && !is.list(comps)) {
-    warnings <- c(warnings, "navbar.components is present but not a mapping/list. Check YAML indentation.")
+    warnings <- add_warning(
+      warnings,
+      "navbar_components_not_mapping",
+      "navbar.components is present but not a mapping/list. Check YAML indentation."
+    )
   }
 
   list(warnings = warnings, errors = errors)
@@ -415,7 +498,11 @@ validate_articles <- function(root_dir, cfg, warnings, errors, template_mode = F
   if (is.null(articles_cfg)) return(list(warnings = warnings, errors = errors))
 
   if (!is.list(articles_cfg)) {
-    warnings <- c(warnings, "`articles:` is present but not a list of sections. Check YAML indentation.")
+    warnings <- add_warning(
+      warnings,
+      "articles_not_sections",
+      "`articles:` is present but not a list of sections. Check YAML indentation."
+    )
     return(list(warnings = warnings, errors = errors))
   }
 
@@ -430,14 +517,16 @@ validate_articles <- function(root_dir, cfg, warnings, errors, template_mode = F
       return(list(warnings = warnings, errors = errors))
     }
     if (length(explicit_refs) > 0) {
-      warnings <- c(
+      warnings <- add_warning(
         warnings,
+        "vignettes_missing_explicit",
         "vignettes/ directory does not exist, but explicit articles are listed in `_pkgdown.yml`."
       )
     }
     if (has_selectors) {
-      warnings <- c(
+      warnings <- add_warning(
         warnings,
+        "vignettes_missing_selectors",
         "vignettes/ directory does not exist, but `_pkgdown.yml` defines `articles:` selector expressions."
       )
     }
@@ -447,8 +536,9 @@ validate_articles <- function(root_dir, cfg, warnings, errors, template_mode = F
   if (length(explicit_refs) > 0) {
     missing <- setdiff(explicit_refs, stems)
     if (length(missing) > 0) {
-      warnings <- c(
+      warnings <- add_warning(
         warnings,
+        "articles_explicit_missing_files",
         paste0(
           "Some articles referenced in `_pkgdown.yml` do not match files under `vignettes/`: ",
           paste(missing, collapse = ", "),
@@ -460,8 +550,9 @@ validate_articles <- function(root_dir, cfg, warnings, errors, template_mode = F
 
   if (!isTRUE(template_mode)) {
     if (has_selectors && length(stems) == 0) {
-      warnings <- c(
+      warnings <- add_warning(
         warnings,
+        "vignettes_empty_selectors",
         "No vignette/article sources found under `vignettes/`, but `_pkgdown.yml` defines `articles:` selectors. Articles groups may be empty."
       )
     }
@@ -476,8 +567,9 @@ validate_articles <- function(root_dir, cfg, warnings, errors, template_mode = F
       if (length(parsed) == 0) next
 
       if (!any(vapply(parsed, simple_selector_matches_any, logical(1), stems = stems))) {
-        warnings <- c(
+        warnings <- add_warning(
           warnings,
+          "articles_selectors_no_match",
           paste0(
             "No vignette/article matched selector(s) for `articles:` ",
             sec$label,
@@ -491,28 +583,7 @@ validate_articles <- function(root_dir, cfg, warnings, errors, template_mode = F
   list(warnings = warnings, errors = errors)
 }
 
-is_strict_warning <- function(w) {
-  if (!is.character(w) || length(w) != 1) return(FALSE)
-
-  patterns <- c(
-    "^No `url:` found in _pkgdown\\.yml\\.",
-    "^`url` does not look like an http\\(s\\) URL:",
-    "^`url` has multiple values;",
-    "^No pkgdown home source found \\(",
-    "^`template:` is present but not a mapping/list\\.",
-    "^`navbar:` is present but not a mapping/list\\.",
-    "^navbar\\.structure is not a mapping/list\\.",
-    "^navbar\\.components is present but not a mapping/list\\.",
-    "^`articles:` is present but not a list of sections\\.",
-    "^vignettes/ directory does not exist, but explicit articles are listed",
-    "^vignettes/ directory does not exist, but `_pkgdown\\.yml` defines `articles:` selector expressions\\.",
-    "^Some articles referenced in `_pkgdown\\.yml` do not match files under `vignettes/`:",
-    "^No vignette/article sources found under `vignettes/`, but `_pkgdown\\.yml` defines `articles:` selectors\\.",
-    "^No vignette/article matched selector\\(s\\) for `articles:`"
-  )
-
-  any(grepl(paste(patterns, collapse = "|"), w))
-}
+## Strict promotion is based on warning codes (see strict_warning_codes).
 
 main <- function() {
   cli <- parse_cli_args(commandArgs(trailingOnly = TRUE))
@@ -523,20 +594,21 @@ main <- function() {
   cfg_path_abs <- normalizePath(cfg_path, winslash = "/", mustWork = FALSE)
   root_dir <- normalizePath(dirname(cfg_path_abs), winslash = "/", mustWork = FALSE)
 
-  warnings <- character()
+  warnings <- list()
   errors <- character()
 
   if (!file.exists(cfg_path_abs)) {
     stop(sprintf("Config file not found: %s", cfg_path), call. = FALSE)
   }
 
+  cfg_ok <- TRUE
   cfg <- validate_yaml(cfg_path_abs)
   if (is.list(cfg) && !is.null(cfg$.error)) {
     errors <- c(errors, cfg$.error)
     cfg <- list()
+    cfg_ok <- FALSE
   }
-  cfg_ok <- TRUE
-  if (length(errors) == 0 && !is_yaml_mapping(cfg)) {
+  if (isTRUE(cfg_ok) && !is_yaml_mapping(cfg)) {
     errors <- c(
       errors,
       "Invalid _pkgdown.yml root. Expected a YAML mapping (key: value), e.g. `url: https://.../`."
@@ -567,15 +639,11 @@ main <- function() {
     errors <- res$errors
   }
 
-  strict_promotions <- character()
   if (isTRUE(strict_mode) && length(warnings) > 0) {
-    strict_promotions <- warnings[vapply(warnings, is_strict_warning, logical(1))]
-    if (length(strict_promotions) > 0) {
-      errors <- c(
-        errors,
-        paste0("[strict] ", strict_promotions)
-      )
-      warnings <- warnings[!vapply(warnings, is_strict_warning, logical(1))]
+    strict_idx <- vapply(warnings, function(w) isTRUE(w$strict), logical(1))
+    if (any(strict_idx)) {
+      errors <- c(errors, paste0("[strict] ", warning_messages(warnings[strict_idx])))
+      warnings <- warnings[!strict_idx]
     }
   }
 
@@ -593,7 +661,7 @@ main <- function() {
 
   if (length(warnings) > 0) {
     cat("Warnings:\n")
-    for (w in warnings) cat("  - ", w, "\n", sep = "")
+    for (w in warning_messages(warnings)) cat("  - ", w, "\n", sep = "")
     cat("\n")
   }
 
