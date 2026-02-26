@@ -61,14 +61,14 @@ jobs:
       - name: Install dependencies
         uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::pkgdown, local::.
+          # yaml/httr2 are used by optional preflight scripts in this skill (safe to remove if unused).
+          extra-packages: any::pkgdown, any::yaml, any::httr2, local::.
           needs: website
           # Optional: force Quarto install (usually not necessary; can be auto-detected)
           # install-quarto: true
 
       # Optional preflight checks.
       # These run only if the corresponding script exists in the target repository.
-      # If you use check_tutorial_urls.R, add any::yaml and any::httr2 to extra-packages above.
       - name: Validate pkgdown config (custom)
         if: hashFiles('scripts/validate_pkgdown_config.R') != ''
         run: Rscript scripts/validate_pkgdown_config.R --strict
