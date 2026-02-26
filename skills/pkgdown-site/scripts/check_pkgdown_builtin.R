@@ -101,7 +101,19 @@ parse_args <- function(args) {
 }
 
 call_pkgdown <- function(fun, root) {
-  fn <- get(fun, envir = asNamespace("pkgdown"))
+  ns <- asNamespace("pkgdown")
+  if (!exists(fun, envir = ns, inherits = FALSE)) {
+    stop(
+      sprintf(
+        "pkgdown::%s() is not available in this pkgdown version (%s). Update pkgdown.",
+        fun,
+        as.character(utils::packageVersion("pkgdown"))
+      ),
+      call. = FALSE
+    )
+  }
+
+  fn <- get(fun, envir = ns, inherits = FALSE)
   fn_args <- names(formals(fn))
 
   # Prefer explicit pkg argument when available; otherwise call in target wd.

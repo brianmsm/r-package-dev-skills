@@ -169,8 +169,14 @@ probe_url <- function(url, timeout) {
   req <- httr2::req_timeout(req, timeout)
   req <- httr2::req_user_agent(req, "pkgdown-tutorial-check/1.0")
 
+  # httr2 does not guarantee that HTTP error statuses won't throw. Ensure we always
+  # get a response object so we can inspect status codes in a uniform way.
+  if (exists("req_error", envir = asNamespace("httr2"), inherits = FALSE)) {
+    req <- httr2::req_error(req, is_error = function(resp) FALSE)
+  }
+
   resp <- tryCatch(
-    httr2::req_perform(req, error_on_status = FALSE),
+    httr2::req_perform(req),
     error = function(e) e
   )
 
