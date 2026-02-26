@@ -64,7 +64,7 @@ help_text <- function() {
     "      --url URL                Site URL (overrides inferred GitHub Pages URL)\n",
     "      --config minimal|grouped Choose _pkgdown.yml template (default: minimal)\n",
     "      --create-index           Create index.md from template (if missing)\n",
-    "      --write-readme           Replace README.md with lean template (backs up and overwrites)\n",
+    "      --write-readme           Replace README.md with lean template (backs up existing, then overwrites)\n",
     "      --create-readme-template Create README-lean-template.md (non-destructive)\n",
     "      --create-get-started     Create vignettes/<pkg>.qmd from template\n",
     "      --create-article NAME    Create vignettes/NAME.qmd from article template (repeatable)\n",
@@ -110,7 +110,7 @@ normalize_article_name <- function(x) {
 }
 
 is_valid_pkg_name <- function(x) {
-  is.character(x) && length(x) == 1 && grepl("^[A-Za-z][A-Za-z0-9.]*$", x)
+  is.character(x) && length(x) == 1 && grepl("^[A-Za-z][A-Za-z0-9.]*[A-Za-z0-9]$", x)
 }
 
 validate_article_name <- function(x) {
@@ -144,7 +144,7 @@ assert_within_dir <- function(root_dir, path) {
     path_cmp <- tolower(path_cmp)
   }
 
-  if (!startsWith(path_cmp, root_cmp)) {
+  if (grepl("(^|/)\\.\\.(/|$)", path_norm) || !startsWith(path_cmp, root_cmp)) {
     stopf("Refusing to write outside target directory: %s", path_norm)
   }
   invisible(TRUE)
@@ -172,11 +172,7 @@ set_frontmatter_title <- function(lines, title) {
     return(lines)
   }
 
-  append(
-    lines[seq_len(start - 1L)],
-    c(title_line, lines[start:length(lines)]),
-    after = start - 1L
-  )
+  append(lines, title_line, after = start - 1L)
 }
 
 apply_option <- function(opts, key, value = NULL, flag_only = FALSE) {
