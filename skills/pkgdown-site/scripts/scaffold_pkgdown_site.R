@@ -63,10 +63,10 @@ help_text <- function() {
     "      --repo NAME              GitHub repo name (used to fill templates)\n",
     "      --url URL                Site URL (overrides inferred GitHub Pages URL)\n",
     "      --config minimal|grouped Choose _pkgdown.yml template (default: minimal)\n",
-    "      --create-index           Create index.md from template (if missing)\n",
+    "      --create-index[=true|false] Create index.md from template (default: true)\n",
     "      --write-readme           Replace README.md with lean template (backs up existing, then overwrites)\n",
     "      --create-readme-template Create README-lean-template.md (non-destructive)\n",
-    "      --create-get-started     Create vignettes/<pkg>.qmd from template\n",
+    "      --create-get-started     Create vignettes/<pkg>.qmd from template (dots replaced with dashes)\n",
     "      --create-article NAME    Create vignettes/NAME.qmd from article template (repeatable)\n",
     "      --web-only-articles      Append created article paths to .Rbuildignore\n",
     "      --create-workflow-example Copy assets/examples/pkgdown-gha.yaml to workflow\n",
@@ -111,6 +111,12 @@ normalize_article_name <- function(x) {
 
 is_valid_pkg_name <- function(x) {
   is.character(x) && length(x) == 1 && grepl("^[A-Za-z][A-Za-z0-9.]*[A-Za-z0-9]$", x)
+}
+
+pkgdown_get_started_stem <- function(pkg) {
+  # pkgdown convention: if a package name includes '.', use '-' in the vignette name.
+  # Example: pack.down -> pack-down
+  gsub(".", "-", pkg, fixed = TRUE)
 }
 
 validate_article_name <- function(x) {
@@ -577,7 +583,8 @@ main <- function() {
     gs_template <- file.path(templates_dir, "get-started.qmd")
     if (!file.exists(gs_template)) stopf("Get started template not found: %s", gs_template)
 
-    gs_out <- file.path(vignettes_dir, paste0(rep$pkg, ".qmd"))
+    gs_name <- pkgdown_get_started_stem(rep$pkg)
+    gs_out <- file.path(vignettes_dir, paste0(gs_name, ".qmd"))
     gs_lines <- apply_replacements(read_text(gs_template), rep)
 
     dir.create(vignettes_dir, showWarnings = FALSE, recursive = TRUE)

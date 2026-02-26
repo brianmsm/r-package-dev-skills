@@ -24,7 +24,8 @@ knitr:
 <!--
 Template notes
 - To make this appear as the top-level "Get started" link in pkgdown, name the file after your package:
-  vignettes/REPO.qmd
+  - Example: vignettes/<package>.qmd
+  - If the package name contains a dot (example: pack.down), use a dash in the vignette name (example: pack-down.qmd).
 - Keep this guide short and stable. Move advanced details to other articles.
 -->
 
