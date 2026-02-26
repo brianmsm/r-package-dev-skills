@@ -25,6 +25,7 @@ navbar:
     # Default:
     left:  [intro, reference, articles, news]
     # If you prefer "Get started" to appear under Articles (not top-level),
+    # omit `intro` to remove the top-level "Get started" link from the navbar.
     # replace the `left:` line above with:
     # left:  [reference, articles, news]
     #
