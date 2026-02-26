@@ -64,7 +64,7 @@ help_text <- function() {
     "      --url URL                Site URL (overrides inferred GitHub Pages URL)\n",
     "      --config minimal|grouped Choose _pkgdown.yml template (default: minimal)\n",
     "      --create-index           Create index.md from template (if missing)\n",
-    "      --write-readme           Replace README.md with lean template (backs up existing)\n",
+    "      --write-readme           Replace README.md with lean template (backs up and overwrites)\n",
     "      --create-readme-template Create README-lean-template.md (non-destructive)\n",
     "      --create-get-started     Create vignettes/<pkg>.qmd from template\n",
     "      --create-article NAME    Create vignettes/NAME.qmd from article template (repeatable)\n",
@@ -103,8 +103,80 @@ normalize_article_name <- function(x) {
   value <- trimws(as.character(x))
   value <- sub("[.](qmd|rmd|md)$", "", value, ignore.case = TRUE)
   value <- gsub("\\\\", "/", value)
+  value <- gsub("/+", "/", value)
   value <- sub("^/+", "", value)
+  value <- sub("/+$", "", value)
   value
+}
+
+is_valid_pkg_name <- function(x) {
+  is.character(x) && length(x) == 1 && grepl("^[A-Za-z][A-Za-z0-9.]*$", x)
+}
+
+validate_article_name <- function(x) {
+  if (!is.character(x) || length(x) != 1) {
+    stopf("Invalid article name (expected a single string).")
+  }
+  if (!nzchar(x)) {
+    stopf("Invalid article name (empty).")
+  }
+  if (grepl("(^|/)\\.\\.?(/|$)", x)) {
+    stopf("Invalid article name: %s (must not contain '.' or '..' path segments).", x)
+  }
+  if (!grepl("^[A-Za-z0-9][A-Za-z0-9._/-]*$", x)) {
+    stopf(
+      "Invalid article name: %s (use letters/digits and only '.', '_', '-', '/'; no spaces).",
+      x
+    )
+  }
+  invisible(TRUE)
+}
+
+assert_within_dir <- function(root_dir, path) {
+  root_norm <- normalizePath(root_dir, winslash = "/", mustWork = FALSE)
+  path_norm <- normalizePath(path, winslash = "/", mustWork = FALSE)
+  prefix <- paste0(sub("/+$", "", root_norm), "/")
+
+  root_cmp <- prefix
+  path_cmp <- path_norm
+  if (identical(.Platform$OS.type, "windows")) {
+    root_cmp <- tolower(root_cmp)
+    path_cmp <- tolower(path_cmp)
+  }
+
+  if (!startsWith(path_cmp, root_cmp)) {
+    stopf("Refusing to write outside target directory: %s", path_norm)
+  }
+  invisible(TRUE)
+}
+
+set_frontmatter_title <- function(lines, title) {
+  if (!is.character(lines) || length(lines) == 0) return(lines)
+  if (!nzchar(title)) return(lines)
+
+  is_delim <- function(x) identical(trimws(x), "---")
+  if (!is_delim(lines[[1]])) return(lines)
+
+  end_idx <- which(vapply(lines[-1], is_delim, logical(1)))
+  if (length(end_idx) == 0) return(lines)
+  end_idx <- end_idx[[1]] + 1L
+
+  start <- 2L
+  end <- end_idx - 1L
+  if (end < start) return(lines)
+
+  title_line <- paste0('title: "', title, '"')
+  title_idx <- which(grepl("^\\s*title\\s*:", lines[start:end]))
+  if (length(title_idx) > 0) {
+    lines[start + title_idx[[1]] - 1L] <- title_line
+    return(lines)
+  }
+
+  append(
+    lines[seq_len(start - 1L)],
+    c(title_line, lines[start:length(lines)]),
+    after = start - 1L
+  )
 }
 
 apply_option <- function(opts, key, value = NULL, flag_only = FALSE) {
@@ -378,7 +450,21 @@ append_rbuildignore <- function(root, paths_to_ignore, quiet = FALSE) {
   existing <- if (file.exists(rb)) read_text(rb) else character()
 
   root_norm <- normalizePath(root, winslash = "/", mustWork = FALSE)
-  rels <- gsub(paste0("^", root_norm, "/"), "", normalizePath(paths_to_ignore, winslash = "/", mustWork = FALSE))
+  paths_norm <- normalizePath(paths_to_ignore, winslash = "/", mustWork = FALSE)
+  root_prefix <- paste0(sub("/+$", "", root_norm), "/")
+
+  root_cmp <- root_prefix
+  paths_cmp <- paths_norm
+  if (identical(.Platform$OS.type, "windows")) {
+    root_cmp <- tolower(root_cmp)
+    paths_cmp <- tolower(paths_cmp)
+  }
+
+  rels <- ifelse(
+    startsWith(paths_cmp, root_cmp),
+    substr(paths_norm, nchar(root_prefix) + 1L, nchar(paths_norm)),
+    paths_norm
+  )
   rels <- gsub("([.|()\\^{}+$*?]|\\[|\\]|\\\\)", "\\\\\\1", rels)
   patterns <- paste0("^", rels, "$")
 
@@ -408,6 +494,12 @@ main <- function() {
 
   if (opts$create_get_started && (is.null(rep$pkg) || !nzchar(rep$pkg))) {
     stopf("--create-get-started requires --pkg or a Package field in DESCRIPTION.")
+  }
+  if (opts$create_get_started && !is_valid_pkg_name(rep$pkg)) {
+    stopf(
+      "Invalid package name for --create-get-started: %s (must be a valid R package name).",
+      rep$pkg
+    )
   }
 
   skill_root <- skill_root_from_script()
@@ -493,6 +585,7 @@ main <- function() {
     gs_lines <- apply_replacements(read_text(gs_template), rep)
 
     dir.create(vignettes_dir, showWarnings = FALSE, recursive = TRUE)
+    assert_within_dir(root, gs_out)
     if (safe_write(gs_out, gs_lines, force = opts$force, quiet = opts$quiet)) {
       created <- c(created, gs_out)
       created_articles <- c(created_articles, gs_out)
@@ -509,10 +602,12 @@ main <- function() {
     for (nm in opts$create_articles) {
       article_name <- normalize_article_name(nm)
       if (!nzchar(article_name)) next
+      validate_article_name(article_name)
 
       out <- file.path(vignettes_dir, paste0(article_name, ".qmd"))
+      assert_within_dir(vignettes_dir, out)
       art_lines <- apply_replacements(read_text(art_template), rep)
-      art_lines <- sub('^title:\\s+"\\{Article title\\}"$', paste0('title: "', article_name, '"'), art_lines)
+      art_lines <- set_frontmatter_title(art_lines, article_name)
 
       if (safe_write(out, art_lines, force = opts$force, quiet = opts$quiet)) {
         created <- c(created, out)
