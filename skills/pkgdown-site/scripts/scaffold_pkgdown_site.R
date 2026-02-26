@@ -370,7 +370,7 @@ build_replacements <- function(opts, root) {
   news <- if (!is.null(site_url)) paste0(site_url, "news/") else "{news_link}"
 
   get_started <- if (!is.null(site_url) && !is.null(pkg)) {
-    paste0(site_url, "articles/", pkg, ".html")
+    paste0(site_url, "articles/", pkgdown_get_started_stem(pkg), ".html")
   } else {
     "{get_started_link}"
   }
@@ -399,6 +399,11 @@ build_replacements <- function(opts, root) {
 
 apply_replacements <- function(lines, rep) {
   out <- lines
+
+  # Template placeholder systems are intentionally supported in this order:
+  # 1) Angle-brackets: used in YAML templates (<repo>, <user-or-org>)
+  # 2) Legacy literals: older templates used ORG/REPO and REPO
+  # 3) Curly braces: newer templates use {pkg}, {org}, {repo}, {pkgdown_url}, etc.
 
   # Angle-bracket placeholders used in YAML templates
   if (!is.null(rep$org)) out <- gsub("<user-or-org>", rep$org, out, fixed = TRUE)
@@ -645,8 +650,9 @@ main <- function() {
 
   msg("\nNext steps:", quiet = opts$quiet)
   msg("  1) Review _pkgdown.yml and set final site metadata.", quiet = opts$quiet)
-  msg("  2) Run pkgdown::build_site() locally to preview.", quiet = opts$quiet)
-  msg("  3) Consider usethis::use_pkgdown_github_pages() for Pages deploy wiring.", quiet = opts$quiet)
+  msg("  2) Review created article titles/descriptions in the .qmd front matter.", quiet = opts$quiet)
+  msg("  3) Run pkgdown::build_site() locally to preview.", quiet = opts$quiet)
+  msg("  4) Consider usethis::use_pkgdown_github_pages() for Pages deploy wiring.", quiet = opts$quiet)
 
   quit(status = 0)
 }
