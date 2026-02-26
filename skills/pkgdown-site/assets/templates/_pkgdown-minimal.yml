@@ -11,6 +11,12 @@ url: https://<user-or-org>.github.io/<repo>/
 template:
   bootstrap: 5
 
+# Optional: improve home page metadata for search engines and landing clarity.
+# home:
+#   title: "An R package for <short searchable topic>"
+#   description: >
+#     One paragraph describing what the package does and why it exists.
+
 navbar:
   structure:
     # Default:
