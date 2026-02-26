@@ -84,6 +84,25 @@ Checks:
 
 - at least one home source exists: `pkgdown/index.md`, `index.md`, or `README.md`
 
+### Step 2b (optional): Add visual identity (logo + favicons)
+
+For a more polished site, generate favicons from your package logo:
+
+```r
+pkgdown::build_favicons()
+```
+
+Skill helper script:
+
+```bash
+Rscript scripts/setup_favicons.R
+```
+
+Notes:
+
+- `build_favicons()` requires internet access.
+- Ignore `pkgdown/` in `.Rbuildignore` to avoid `R CMD check` notes.
+
 ### Step 3: Local preview build
 
 Run a local site build:
@@ -165,6 +184,8 @@ Checks:
 - `index.md` or `pkgdown/index.md`: richer landing page
 - `vignettes/`: article and vignette sources (`.Rmd`, `.qmd`, `.md`)
 - `NEWS.md`: release notes shown as News
+- `logo.svg`/`logo.png` or `man/figures/logo.*`: package logo used for visual identity
+- `pkgdown/favicon/`: generated favicon assets consumed by site builds
 - `.github/workflows/pkgdown.yaml`: CI build plus deploy
 
 ## Articles, Vignettes, and Get Started
@@ -304,3 +325,4 @@ Before deploy/release, use checks in this order:
 - deploy/build issues: `references/troubleshooting.md`
 - templates: `assets/templates/`
 - preflight scripts: `scripts/check_pkgdown_ready.R`, `scripts/validate_pkgdown_config.R`, and `scripts/check_pkgdown_builtin.R`
+- visual identity helper: `scripts/setup_favicons.R`

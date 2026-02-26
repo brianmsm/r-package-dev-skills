@@ -180,6 +180,26 @@ Fix:
 - ensure `setup-pandoc` is present
 - add missing system dependencies if required
 
+### Symptom: Favicon generation fails
+
+Likely causes:
+
+- no detectable package logo (`logo.svg`/`logo.png` or `man/figures/logo.*`)
+- no internet access for `build_favicons()`
+- existing `pkgdown/favicon` and no overwrite
+
+Checks:
+
+- verify logo file exists in a pkgdown-detected location
+- confirm network access is available
+- if output exists, rerun with overwrite
+
+Fix:
+
+- add a logo and rerun `pkgdown::build_favicons(overwrite = TRUE)`
+- or use `scripts/setup_favicons.R --overwrite`
+- add `^pkgdown$` to `.Rbuildignore` to avoid `R CMD check` notes
+
 ### Symptom: Site builds but looks unstyled or layout is broken
 
 Likely causes:
@@ -389,3 +409,4 @@ Then reintroduce complexity gradually (grouped articles, theme customizations, e
 - growing package strategy: `references/package-in-growth.md`
 - config templates: `assets/templates/`
 - preflight scripts: `scripts/validate_pkgdown_config.R`, `scripts/check_pkgdown_ready.R`, and `scripts/check_pkgdown_builtin.R`
+- visual identity helper: `scripts/setup_favicons.R`
