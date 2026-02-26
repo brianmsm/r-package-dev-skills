@@ -301,5 +301,6 @@ Use these checks periodically:
 - architecture rules: `references/content-architecture.md`
 - package growth strategy: `references/package-in-growth.md`
 - setup and publish flow: `references/pkgdown-flow.md`
+- theming/layout/assets customization: `references/customization.md`
 - troubleshooting: `references/troubleshooting.md`
 - templates: `assets/templates/`

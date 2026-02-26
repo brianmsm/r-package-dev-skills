@@ -409,6 +409,7 @@ Then reintroduce complexity gradually (grouped articles, theme customizations, e
 - content placement rules: `references/content-architecture.md`
 - growing package strategy: `references/package-in-growth.md`
 - learnr/tutorial embedding: `references/tutorials.md`
+- theming/layout/assets customization: `references/customization.md`
 - config templates: `assets/templates/`
 - preflight scripts: `scripts/validate_pkgdown_config.R`, `scripts/check_pkgdown_ready.R`, `scripts/check_pkgdown_builtin.R`, and optionally `scripts/check_tutorial_urls.R`
 - visual identity helper: `scripts/setup_favicons.R`

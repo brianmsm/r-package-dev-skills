@@ -325,6 +325,7 @@ Before deploy/release, use checks in this order:
 - packages in growth: `references/package-in-growth.md`
 - deploy/build issues: `references/troubleshooting.md`
 - learnr/tutorial embedding: `references/tutorials.md`
+- theming/layout/assets customization: `references/customization.md`
 - templates: `assets/templates/`
 - preflight scripts: `scripts/check_pkgdown_ready.R`, `scripts/validate_pkgdown_config.R`, `scripts/check_pkgdown_builtin.R`, and optionally `scripts/check_tutorial_urls.R`
 - visual identity helper: `scripts/setup_favicons.R`

@@ -114,6 +114,7 @@ Open only what is needed:
 - active-development strategy: `references/package-in-growth.md`
 - deploy and build failures: `references/troubleshooting.md`
 - learnr/tutorial embedding strategy: `references/tutorials.md`
+- theming/layout/assets customization: `references/customization.md`
 - style options and naming patterns: `references/examples-notes.md`
 
 ## Package In Growth Module
