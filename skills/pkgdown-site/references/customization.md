@@ -102,7 +102,8 @@ Example:
 ```yaml
 template:
   includes:
-    in_header: <link rel="stylesheet" href="https://example.com/fonts.css" />
+    # Replace with your actual stylesheet URL:
+    in_header: <link rel="stylesheet" href="https://<host>/fonts.css" />
 ```
 
 ## Layout
