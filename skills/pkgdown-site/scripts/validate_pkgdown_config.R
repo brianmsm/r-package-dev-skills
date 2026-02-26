@@ -378,6 +378,8 @@ simple_selector_matches_any <- function(sel, stems) {
   pat <- sel$pattern
   if (!nzchar(pat)) return(FALSE)
 
+  # pkgdown `articles:` selectors are tidyselect-like. tidyselect defaults to
+  # ignore.case = TRUE for these helpers unless explicitly overridden.
   ignore_case <- if (isTRUE(sel$ignore_case) || identical(sel$ignore_case, FALSE)) {
     sel$ignore_case
   } else {
