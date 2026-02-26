@@ -342,11 +342,33 @@ parse_simple_selector <- function(expr) {
 
   if (!fn %in% c("starts_with", "ends_with", "matches", "contains")) return(NULL)
 
+  # Simple parser: captures the first quoted string in the selector args.
+  # Limitations:
+  # - Does not handle escaped quotes inside the string.
+  # - Will skip validation for selectors that don't match this pattern.
   q <- regexec("(['\"])(.*?)\\1", args)
   qparts <- regmatches(args, q)[[1]]
   if (length(qparts) < 3) return(NULL)
 
-  list(negative = negative, fn = fn, pattern = qparts[[3]], raw = expr)
+  parse_bool_flag <- function(arg_str, name) {
+    rx <- paste0("\\b", name, "\\s*=\\s*(TRUE|FALSE)\\b")
+    m <- regexec(rx, arg_str, ignore.case = TRUE)
+    parts <- regmatches(arg_str, m)[[1]]
+    if (length(parts) < 2) return(NA)
+    identical(toupper(parts[[2]]), "TRUE")
+  }
+
+  ignore_case <- parse_bool_flag(args, "ignore\\.case")
+  perl <- if (identical(fn, "matches")) parse_bool_flag(args, "perl") else NA
+
+  list(
+    negative = negative,
+    fn = fn,
+    pattern = qparts[[3]],
+    ignore_case = ignore_case,
+    perl = perl,
+    raw = expr
+  )
 }
 
 simple_selector_matches_any <- function(sel, stems) {
@@ -356,12 +378,32 @@ simple_selector_matches_any <- function(sel, stems) {
   pat <- sel$pattern
   if (!nzchar(pat)) return(FALSE)
 
+  ignore_case <- if (isTRUE(sel$ignore_case) || identical(sel$ignore_case, FALSE)) {
+    sel$ignore_case
+  } else {
+    TRUE
+  }
+
+  stems_cmp <- stems
+  pat_cmp <- pat
+  if (isTRUE(ignore_case)) {
+    stems_cmp <- tolower(stems)
+    pat_cmp <- tolower(pat)
+  }
+
+  safe_any_grepl <- function(pattern, x, ...) {
+    tryCatch(any(grepl(pattern, x, ...)), error = function(e) FALSE)
+  }
+
   switch(
     sel$fn,
-    starts_with = any(startsWith(stems, pat)),
-    ends_with = any(endsWith(stems, pat)),
-    contains = any(grepl(pat, stems, fixed = TRUE)),
-    matches = tryCatch(any(grepl(pat, stems, perl = TRUE)), error = function(e) FALSE),
+    starts_with = any(startsWith(stems_cmp, pat_cmp)),
+    ends_with = any(endsWith(stems_cmp, pat_cmp)),
+    contains = any(grepl(pat, stems, fixed = TRUE, ignore.case = isTRUE(ignore_case))),
+    matches = {
+      perl <- if (isTRUE(sel$perl) || identical(sel$perl, FALSE)) sel$perl else FALSE
+      safe_any_grepl(pat, stems, ignore.case = isTRUE(ignore_case), perl = perl)
+    },
     FALSE
   )
 }
