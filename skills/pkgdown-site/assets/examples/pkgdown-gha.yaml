@@ -1,29 +1,73 @@
-name: pkgdown
+# GitHub Actions workflow to build and deploy a pkgdown site
+# Save as: .github/workflows/pkgdown.yaml
+#
+# Based on the recommended r-lib/actions v2 example (deploy to gh-pages).
+# This workflow builds the site into `docs/` and deploys it to the `gh-pages` branch.
+#
+# Notes:
+# - Ensure GitHub Actions has permission to write to the repo:
+#   Settings -> Actions -> General -> Workflow permissions -> "Read and write permissions".
+# - If you use Quarto (.qmd) vignettes/articles, setup-r-dependencies can install Quarto automatically
+#   when .qmd files are present (see install-quarto parameter in r-lib/actions docs).
 
 on:
   push:
-    branches: [main]
+    branches: [main, master]
+  pull_request:
+  release:
+    types: [published]
   workflow_dispatch:
 
-permissions:
-  contents: write
+name: pkgdown
+
+permissions: read-all
 
 jobs:
   pkgdown:
     runs-on: ubuntu-latest
+
+    # Only restrict concurrency for non-PR jobs
+    concurrency:
+      group: pkgdown-${{ github.event_name != 'pull_request' || github.run_id }}
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+
+    permissions:
+      contents: write
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: r-lib/actions/setup-r@v2
+      - name: Setup Pandoc
+        uses: r-lib/actions/setup-pandoc@v2
 
-      - uses: r-lib/actions/setup-pandoc@v2
+      - name: Setup R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      # Optional: TinyTeX is only needed if you build PDF vignettes or need LaTeX in CI.
+      # - name: Setup TinyTeX
+      #   uses: r-lib/actions/setup-tinytex@v2
 
       - name: Install dependencies
-        run: |
-          Rscript -e 'install.packages(c("pkgdown", "remotes"), repos = "https://cloud.r-project.org")'
-          Rscript -e 'remotes::install_deps(dependencies = TRUE)'
+        uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::pkgdown, local::.
+          needs: website
+          # Optional: force Quarto install (usually not necessary; can be auto-detected)
+          # install-quarto: true
 
-      - name: Build and deploy pkgdown
-        run: Rscript -e 'pkgdown::deploy_to_branch(new_process = FALSE)'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build site
+        run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
+        shell: Rscript {0}
+
+      - name: Deploy to GitHub Pages
+        if: github.event_name != 'pull_request'
+        uses: JamesIves/github-pages-deploy-action@v4.5.0
+        with:
+          clean: false
+          branch: gh-pages
+          folder: docs

@@ -1,17 +1,24 @@
-url: https://ORG.github.io/REPO
+# Minimal pkgdown configuration
+# Save as: _pkgdown.yml
+#
+# Notes:
+# - Replace <user-or-org> and <repo> with your actual GitHub user/org and repo name.
+# - This navbar mirrors pkgdown's documented default structure; remove "tutorials" if you don't use them.
+# - If GitHub is not auto-detected, define it explicitly under navbar.components.github.
+
+url: https://<user-or-org>.github.io/<repo>/
 
 template:
   bootstrap: 5
 
-home:
-  title: REPO
-  description: One-line package description.
-
 navbar:
   structure:
-    left: [home, reference, articles, news]
-    right: [github]
-  components:
-    github:
-      icon: fa-github
-      href: https://github.com/ORG/REPO
+    left:  [intro, reference, articles, tutorials, news]
+    right: [search, github]
+
+# Optional explicit GitHub component:
+# navbar:
+#   components:
+#     github:
+#       icon: fa-github
+#       href: https://github.com/<user-or-org>/<repo>

@@ -1,44 +1,120 @@
 ---
-title: "Get started"
+title: "Get started with REPO"
+description: >
+  A guided, minimal happy-path workflow for REPO. This page is intentionally short.
+vignette: >
+  %\VignetteIndexEntry{Get started with REPO}
+  %\VignetteEngine{quarto::html}
+  %\VignetteEncoding{UTF-8}
 format:
   html:
+    minimal: true
     toc: true
+    toc-depth: 3
 execute:
   echo: true
+  warning: false
+  message: false
+knitr:
+  opts_chunk:
+    collapse: true
+    comment: "#>"
 ---
 
-## Goal
+<!--
+Template notes
+- To make this appear as the top-level "Get started" link in pkgdown, name the file after your package:
+  vignettes/REPO.qmd
+- Keep this guide short and stable. Move advanced details to other articles.
+-->
 
-State the user outcome of this guide in one paragraph.
+## What you will do
 
-## Prerequisites
+In this guide, you will:
 
-- R version requirement
-- package installation
+1. Install REPO
+2. Run one minimal, stable example
+3. Learn where to go next (Workflows, Reference, FAQ)
 
 ## Install
 
 ```{r}
-#| eval: false
-# install.packages("REPO")
+# Recommended (fast)
+# install.packages("pak")
+pak::pak("ORG/REPO")
 ```
 
-## Happy path workflow
+Alternative:
 
 ```{r}
-#| eval: false
-# library(REPO)
-# data <- example_data()
-# result <- run_workflow(data)
-# print(result)
+# install.packages("remotes")
+remotes::install_github("ORG/REPO")
 ```
 
-## Interpret results
+## Load the package
 
-Explain how to read the main outputs.
+```{r}
+library(REPO)
+```
+
+## A minimal workflow
+
+This section should demonstrate a single, stable happy path.
+
+### Inputs
+
+Briefly describe the expected inputs:
+
+- Data format: {data description}
+- Required columns: {columns}
+- Assumptions: {assumptions}
+
+### Step 1. Prepare data
+
+```{r}
+# Replace with a real helper once stable
+# data <- REPO::example_data()
+# data <- REPO::prep_data(data, ...)
+```
+
+### Step 2. Fit the model
+
+```{r}
+# fit <- REPO::fit_model(data, ...)
+```
+
+### Step 3. Inspect results
+
+```{r}
+# summary(fit)
+# plot(fit)
+```
+
+### Step 4. Extract key outputs
+
+```{r}
+# out <- REPO::extract_results(fit)
+# out
+```
+
+## Common pitfalls
+
+- **Pitfall 1**: {short description}
+  - Fix: {short fix}
+
+- **Pitfall 2**: {short description}
+  - Fix: {short fix}
 
 ## Where to go next
 
-- advanced workflow article
-- FAQ article
-- function reference page
+- **Workflows**: See the Articles section for end-to-end guides by module.
+- **Reference**: Use Reference pages to understand individual functions and arguments.
+- **FAQ**: See the FAQ and troubleshooting article for common issues.
+
+## Session info
+
+If you report issues, include your session info:
+
+```{r}
+sessionInfo()
+```

@@ -1,38 +1,77 @@
-url: https://ORG.github.io/REPO
+# Grouped pkgdown configuration (articles grouped for index + navbar)
+# Save as: _pkgdown.yml
+#
+# Replace:
+# - <user-or-org> and <repo> in `url`
+# - (optional) edit section titles and patterns to match your vignette/article names
+#
+# Notes:
+# - `articles:` controls BOTH the articles index and (optionally) the Articles dropdown.
+# - Each article name is the path under `vignettes/` without extension.
+#   Example: vignettes/pizza/slice.Rmd -> pizza/slice
+# - A vignette with the same name as the package becomes a top-level "Get started" link by default.
+#   If you want "Get started" inside Articles instead, see the optional variant below.
+
+url: https://<user-or-org>.github.io/<repo>/
 
 template:
   bootstrap: 5
 
-home:
-  title: REPO
-  description: One-line package description.
-
 navbar:
   structure:
-    left: [get-started, reference, articles, news]
-    right: [github]
-  components:
-    get-started:
-      text: Get started
-      href: articles/get-started.html
-    articles:
-      text: Articles
-      menu:
-        - text: Workflows
-          href: articles/index.html
-        - text: FAQ
-          href: articles/faq.html
-    github:
-      icon: fa-github
-      href: https://github.com/ORG/REPO
+    left:  [intro, reference, articles, tutorials, news]
+    right: [search, github]
+
+# OPTIONAL VARIANT:
+# If you prefer "Get started" to appear under Articles (not top-level),
+# remove `intro` from the navbar structure above, and then include your
+# package-named article in the first section below.
+#
+# navbar:
+#   structure:
+#     left:  [reference, articles, tutorials, news]
+#     right: [search, github]
+
+# Optional explicit GitHub component:
+# navbar:
+#   components:
+#     github:
+#       icon: fa-github
+#       href: https://github.com/<user-or-org>/<repo>
 
 articles:
-  - title: Get started
-    contents:
-      - get-started
   - title: Workflows
+    desc: >
+      End-to-end guides for common tasks. Start here after the quick start.
+    navbar: Workflows
     contents:
-      - starts_with("workflow-")
+      - starts_with("workflows-")
+
   - title: Concepts
+    desc: >
+      Background concepts, model intuition, and design choices behind workflows.
+    navbar: Concepts
     contents:
-      - starts_with("concept-")
+      - starts_with("concepts-")
+
+  - title: FAQ and troubleshooting
+    desc: >
+      Common questions, pitfalls, and quick fixes.
+    navbar: FAQ
+    contents:
+      - faq
+      - troubleshooting
+
+  - title: Developer
+    desc: >
+      Notes aimed at contributors and developers. Not required for typical users.
+    navbar: Developer
+    contents:
+      - starts_with("dev-")
+
+  # Special section: "internal" is case sensitive and is NOT shown on the index.
+  # Use it to silence warnings about non-user-facing articles.
+  - title: internal
+    contents:
+      - starts_with("internal-")
+      - internal/index

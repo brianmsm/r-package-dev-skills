@@ -1,35 +1,165 @@
 ---
-title: "Workflow title"
+title: "{Article title}"
+description: >
+  {One-sentence summary of what this guide helps the user accomplish.}
 format:
   html:
+    minimal: true
     toc: true
+    toc-depth: 3
 execute:
   echo: true
+  warning: false
+  message: false
+knitr:
+  opts_chunk:
+    collapse: true
+    comment: "#>"
 ---
 
-## Context
+<!--
+Template notes
+- This is intended to be used as a website-only article (fast iteration while the API evolves).
+- Create via `usethis::use_article("name")` to ensure it is added to .Rbuildignore automatically.
+- Keep this guide task-oriented. Link to Reference pages for function details.
+- pkgdown + Quarto assumes HTML with `minimal: true` and has some feature limitations.
+-->
 
-Explain when to use this workflow.
+## Goal
+
+State the concrete goal of this article:
+
+- By the end, you will be able to {do X} with {pkg}.
+
+## Audience
+
+Who is this for?
+
+- New users who {need Y}
+- Intermediate users who {need Z}
 
 ## Prerequisites
 
-- expected package version
-- input assumptions
+What the user needs before starting:
 
-## Step-by-step
+- R version: {e.g., >= 4.2}
+- Packages: `{pkg}`, `{dependency1}`, `{dependency2}`
+- Data requirements: {format, required columns, assumptions}
 
-```{r}
-#| eval: false
-# library(REPO)
-# inputs <- prepare_inputs(...)
-# output <- run_analysis(inputs)
+Optionally provide a small checklist:
+
+- [ ] {Requirement 1}
+- [ ] {Requirement 2}
+- [ ] {Requirement 3}
+
+## Setup
+
+```r
+library({pkg})
 ```
+
+If you need optional dependencies:
+
+```r
+# install.packages("{pkg2}")
+# library({pkg2})
+```
+
+## Overview of the workflow
+
+Describe the workflow in 3 to 6 steps. Example:
+
+1. Prepare inputs
+2. Fit the model
+3. Inspect fit
+4. Extract outputs
+5. Visualize or report
+
+## Step 1: Prepare inputs
+
+Explain the expected structure and then provide minimal code.
+
+```r
+# x <- {pkg}::example_data()
+# x <- {pkg}::prep_data(x, ...)
+```
+
+### Checks
+
+Include lightweight checks to reduce user frustration:
+
+```r
+# stopifnot(is.data.frame(x))
+# {pkg}::validate_inputs(x)
+```
+
+## Step 2: Run the main procedure
+
+```r
+# res <- {pkg}::do_the_thing(x, ...)
+```
+
+Explain key arguments briefly and link to Reference pages for full details.
+
+## Step 3: Inspect results
+
+```r
+# summary(res)
+# plot(res)
+```
+
+If you provide printed output, keep it short and stable.
+
+## Step 4: Extract what you need
+
+```r
+# out <- {pkg}::extract_results(res)
+# out
+```
+
+If appropriate, include a table-friendly object.
 
 ## Common pitfalls
 
-- pitfall one and how to avoid it
-- pitfall two and how to diagnose it
+List common failures and how to fix them.
 
-## Related reference
+### Pitfall 1: {short name}
 
-- link to relevant functions in `reference/`
+**Symptom:** {what user sees}
+**Cause:** {likely cause}
+**Fix:** {what to do}
+
+```r
+# Example fix
+# x <- {pkg}::prep_data(x, ...)
+```
+
+### Pitfall 2: {short name}
+
+**Symptom:** {what user sees}
+**Cause:** {likely cause}
+**Fix:** {what to do}
+
+## Variations
+
+Optional: add one or two variations, but avoid turning the article into a full manual.
+
+- Variation A: {when to use it}
+- Variation B: {when to use it}
+
+## See also
+
+Link the user to the next best resources:
+
+- Reference: `{pkg}::function_name()` documentation
+- Articles: {related workflow article}
+- FAQ: {faq article}
+- Troubleshooting: {troubleshooting article}
+
+## Session info
+
+Encourage reproducibility for issue reports:
+
+```r
+sessionInfo()
+```
