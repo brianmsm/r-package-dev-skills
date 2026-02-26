@@ -69,8 +69,15 @@ jobs:
 
       # Optional preflight checks.
       # These run only if the corresponding script exists in the target repository.
+      # Suggested convention:
+      # - PRs: run the fast lint without --strict (avoid blocking iteration).
+      # - Push/release: run the same lint with --strict before deploy.
       - name: Validate pkgdown config (custom)
-        if: hashFiles('scripts/validate_pkgdown_config.R') != ''
+        if: hashFiles('scripts/validate_pkgdown_config.R') != '' && github.event_name == 'pull_request'
+        run: Rscript scripts/validate_pkgdown_config.R
+
+      - name: Validate pkgdown config (custom, strict for deploy events)
+        if: hashFiles('scripts/validate_pkgdown_config.R') != '' && github.event_name != 'pull_request'
         run: Rscript scripts/validate_pkgdown_config.R --strict
 
       - name: pkgdown diagnostics (built-in)
