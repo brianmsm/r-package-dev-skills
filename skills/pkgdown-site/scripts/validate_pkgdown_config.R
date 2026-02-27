@@ -484,7 +484,9 @@ simple_selector_matches_any <- function(sel, stems) {
     sel$fn,
     starts_with = any(startsWith(stems_cmp, pat_cmp)),
     ends_with = any(endsWith(stems_cmp, pat_cmp)),
-    contains = any(grepl(pat, stems, fixed = TRUE, ignore.case = isTRUE(ignore_case))),
+    # Base R ignores ignore.case when fixed = TRUE, so we compare pre-normalized
+    # strings instead of relying on grepl(ignore.case=...).
+    contains = safe_any_grepl(pat_cmp, stems_cmp, fixed = TRUE),
     matches = {
       perl <- if (isTRUE(sel$perl) || identical(sel$perl, FALSE)) sel$perl else FALSE
       safe_any_grepl(pat, stems, ignore.case = isTRUE(ignore_case), perl = perl)
