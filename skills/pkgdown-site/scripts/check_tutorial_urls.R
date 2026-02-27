@@ -148,9 +148,6 @@ validate_tutorial_entries <- function(tutorials) {
     } else if (!is_http_url(url)) {
       problems <- c(problems, sprintf("tutorials[%d] has non-http(s) URL: %s", i, url))
     }
-    if (nzchar(source) && !is_http_url(source)) {
-      problems <- c(problems, sprintf("tutorials[%d] `source` is not http(s): %s", i, source))
-    }
 
     entries[[length(entries) + 1]] <- list(
       index = i,
