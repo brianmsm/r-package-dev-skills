@@ -1,6 +1,6 @@
 ---
 name: pkgdown-site
-description: Design, configure, organize, and troubleshoot pkgdown websites for R packages, including GitHub Pages deployment, content architecture, articles versus vignettes, and migration from oversized READMEs in packages that are still evolving.
+description: "End-to-end pkgdown workflow for R packages: setup, publishing, content architecture, articles/vignettes, README migration, troubleshooting, and maintenance scripts."
 ---
 
 # Skill: pkgdown-site
@@ -50,6 +50,72 @@ Do not use this skill when:
 3. Use progressive documentation for packages that are still changing.
 4. Prefer standard `usethis` setup and deployment paths.
 5. Validate locally before discussing CI or GitHub Pages failures.
+
+## Recommended Default (If Unspecified)
+
+If the user does not specify a publishing preference, default to:
+
+- Deploy via a `gh-pages` branch from CI (keeps built output out of the default branch).
+- Use the workflow template: `assets/examples/pkgdown-gha.yaml`.
+
+Use alternatives only when explicitly requested or when constraints require them:
+
+- Publish from `/docs` on the default branch (branch source in Pages): `assets/examples/pkgdown-gha-docs-branch.yaml`.
+- Publish via GitHub Pages "Source: GitHub Actions" (artifact deploy): `assets/examples/pkgdown-gha-pages-artifact.yaml`.
+
+If the user does not specify an article/vignette source format, default to `--format auto` in `scripts/scaffold_pkgdown_site.R`:
+
+- If the target repo shows any `.Rmd` usage (for example `vignettes/*.Rmd`, `README.Rmd`, `index.Rmd`, or any other `.Rmd`), prefer `.Rmd`.
+- Otherwise, default to `.qmd` (Quarto).
+
+Do not auto-convert between formats as part of the default workflow.
+
+### Additional Tie-breakers (Defaults When Unspecified)
+
+- Home location: Default to `index.md` at repository root for the pkgdown home. Use `pkgdown/index.md` only if the user explicitly wants a "website-only" home page and prefers not to place `index.md` at repo root.
+- README strategy: Default to keep `README.md` as a lean quick-start hub for GitHub and move long-form docs to the pkgdown home (`index.md`/`pkgdown/index.md`) and articles. Do not rewrite or shorten the README unless it is already long and hard to scan, or the user explicitly requests a lean README migration.
+- CI strictness: For exploratory/local checks and PRs, run `scripts/validate_pkgdown_config.R` without `--strict`. For deploy/push/release gating, enable `--strict`. Note: `--strict` promotes only warnings flagged as strict (it does not turn every warning into an error).
+- Pages source: Default to branch-based Pages publishing to `gh-pages`. If the user explicitly wants to avoid a `gh-pages` branch and also avoid committing rendered output to the default branch, prefer Pages Source: GitHub Actions (artifact deploy).
+- Theme customization: Default to no theme changes unless the user asks. If the user asks "make it nicer" without specifics, start with a Bootswatch theme (low-friction) and keep Bootstrap 5.
+- Workflow example copying: use `--create-workflow-example` to copy an example workflow into `.github/workflows/pkgdown.yaml`. Default is `gh-pages`; select a different template with `--workflow-template gh-pages|docs-branch|pages-artifact`.
+
+## Inputs To Collect (Minimum)
+
+Before making changes, collect:
+
+- Target repository path (package root).
+- Publishing pattern:
+  - deploy built site output to `gh-pages` (recommended default for pkgdown), or
+  - publish from default branch `/docs`.
+- Workflow templates (choose one): `assets/examples/pkgdown-gha.yaml` (deploy to `gh-pages`), `assets/examples/pkgdown-gha-docs-branch.yaml` (publish from `/docs` on the default branch), `assets/examples/pkgdown-gha-pages-artifact.yaml` (Pages "Source: GitHub Actions").
+- Whether the project uses Quarto (`.qmd`) for articles/vignettes.
+- README strategy: keep as-is vs make it lean (and where long-form docs should live).
+
+## Helper Scripts (Deterministic)
+
+Prefer these scripts for repeatable checks, scaffolding, and troubleshooting:
+
+- `scripts/check_pkgdown_ready.R`: quick "is this repo ready?" report (non-destructive).
+- `scripts/validate_pkgdown_config.R`: validate `_pkgdown.yml` structure and common repo pitfalls.
+- `scripts/scaffold_pkgdown_site.R`: create `_pkgdown.yml`, `index.md`, and optional articles from templates (safe by default).
+- `scripts/clean_and_build.R`: rebuild helper to avoid stale artifacts after renames/removals.
+- `scripts/check_pkgdown_builtin.R`: run pkgdown-native diagnostics (`check_pkgdown()`, `pkgdown_sitrep()`).
+- `scripts/check_tutorial_urls.R`: validate tutorial URLs when `tutorials:` is configured.
+- `scripts/setup_favicons.R`: favicon helper (may require internet access).
+
+Example usage (recommended: run from the target package root, where `DESCRIPTION` exists):
+
+- `Rscript scripts/check_pkgdown_ready.R .`
+- `Rscript scripts/validate_pkgdown_config.R _pkgdown.yml --strict`
+- `Rscript scripts/scaffold_pkgdown_site.R --target . --pkg <pkg> --org <org> --repo <repo>`
+
+Example usage (run skill scripts directly, passing explicit paths):
+
+- `Rscript <path-to-skill>/scripts/check_pkgdown_ready.R /path/to/package/root`
+- `Rscript <path-to-skill>/scripts/validate_pkgdown_config.R /path/to/package/_pkgdown.yml --strict`
+- `Rscript <path-to-skill>/scripts/scaffold_pkgdown_site.R --target /path/to/package/root --pkg <pkg> --org <org> --repo <repo>`
+
+In this repository, `<path-to-skill>` is `skills/pkgdown-site`.
 
 ## Standard Workflow
 
@@ -126,7 +192,7 @@ If the package is actively evolving and the README is oversized, follow the play
 
 Follow this order when skill is active:
 
-1. Run minimal repository diagnosis.
+1. Run minimal repository diagnosis against the target package root (prefer `scripts/check_pkgdown_ready.R`).
 2. Classify package state.
 3. Select work path: setup, reorg, troubleshooting, or maintenance.
 4. Read only relevant reference files.
