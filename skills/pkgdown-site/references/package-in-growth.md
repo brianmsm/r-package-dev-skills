@@ -1,5 +1,11 @@
 # Package In Growth
 
+## Note On Templates And Placeholders
+
+This skill's templates use `{snake_case}` placeholders (for example `{domain}`, `{modules_list}`, `{primary_capability}`).
+When you scaffold files from templates, replace any remaining placeholders before publishing.
+The scaffolder reports unresolved placeholders in generated files to help prevent publishing with template tokens.
+
 Use this module for packages that are evolving quickly, where README is growing and core APIs still change.
 
 ## Goals

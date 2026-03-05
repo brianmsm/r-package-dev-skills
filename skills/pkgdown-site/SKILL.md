@@ -119,6 +119,11 @@ The skill directory is the folder that contains this SKILL.md file.
 
 Example (this repository): `<path-to-skill>` is `skills/pkgdown-site`.
 
+## Template Placeholders
+
+Templates use `{snake_case}` placeholders (for example `{domain}`, `{modules_list}`, `{primary_capability}`).
+After scaffolding, the scaffolder reports any unresolved placeholders so they can be replaced before publishing.
+
 ## Standard Workflow
 
 ### 1. Initial Setup
