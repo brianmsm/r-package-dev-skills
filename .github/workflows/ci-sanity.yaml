@@ -1,0 +1,138 @@
+name: CI sanity (skills)
+
+on:
+  push:
+    paths:
+      - "skills/**"
+      - ".github/workflows/**"
+      - "AGENTS.md"
+  pull_request:
+    paths:
+      - "skills/**"
+      - ".github/workflows/**"
+      - "AGENTS.md"
+  workflow_dispatch:
+jobs:
+  sanity:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - name: Install minimal dependencies
+        run: |
+          Rscript -e 'install.packages(c("yaml"), repos="https://cloud.r-project.org")'
+
+      - name: Sanity checks (R parse, YAML parse, frontmatter)
+        run: |
+          Rscript - <<'RS'
+          library(yaml)
+
+          fail <- function(msg) {
+            cat("ERROR:", msg, "\n")
+            quit(status = 1)
+          }
+
+          norm <- function(x) gsub("\\\\", "/", x)
+
+          # ---- 1) Parse R scripts under skills/**/scripts
+          r_scripts <- list.files("skills", recursive = TRUE, full.names = TRUE, pattern = "\\\\.R$", ignore.case = TRUE)
+          r_scripts <- r_scripts[grepl("/scripts/", norm(r_scripts), fixed = TRUE)]
+          for (f in r_scripts) {
+            tryCatch(
+              parse(file = f),
+              error = function(e) fail(paste("R parse failed:", f, conditionMessage(e)))
+            )
+          }
+          cat("OK: parsed R scripts:", length(r_scripts), "\n")
+
+          # ---- 2) Parse YAML templates/examples under skills/**
+          yml_files <- list.files("skills", recursive = TRUE, full.names = TRUE, pattern = "\\\\.(yml|yaml)$", ignore.case = TRUE)
+          for (f in yml_files) {
+            tryCatch(
+              yaml.load_file(f),
+              error = function(e) fail(paste("YAML parse failed:", f, conditionMessage(e)))
+            )
+          }
+          cat("OK: parsed YAML files:", length(yml_files), "\n")
+
+          # ---- 3) Extract and parse YAML frontmatter
+          extract_frontmatter <- function(lines) {
+            if (length(lines) < 2) return(NULL)
+            if (trimws(lines[1]) != "---") return(NULL)
+            end_rel <- which(trimws(lines[-1]) == "---")[1]
+            if (is.na(end_rel)) return(NULL)
+            end <- end_rel + 1L
+            if (end <= 2) return("")
+            paste(lines[2:(end - 1L)], collapse = "\n")
+          }
+
+
+          # 3a) Rmd templates should have parseable YAML frontmatter
+          rmd_files <- list.files("skills", recursive = TRUE, full.names = TRUE, pattern = "\\.Rmd$", ignore.case = TRUE)
+          rmd_files <- rmd_files[grepl("/assets/templates/", norm(rmd_files), fixed = TRUE)]
+          for (f in rmd_files) {
+            lines <- readLines(f, warn = FALSE, encoding = "UTF-8")
+            fm <- extract_frontmatter(lines)
+            if (is.null(fm)) fail(paste("Missing YAML frontmatter in Rmd template:", f))
+            tryCatch(
+              yaml.load(fm),
+              error = function(e) fail(paste("Rmd frontmatter YAML parse failed:", f, conditionMessage(e)))
+            )
+          }
+          cat("OK: parsed Rmd frontmatter:", length(rmd_files), "\n")
+          # 3a) QMD templates should have parseable YAML frontmatter
+
+          # 3b) Markdown templates: if a file has YAML frontmatter, it must parse
+          md_tmpl <- list.files("skills", recursive = TRUE, full.names = TRUE, pattern = "\\.md$", ignore.case = TRUE)
+          md_tmpl <- md_tmpl[grepl("/assets/templates/", norm(md_tmpl), fixed = TRUE)]
+          for (f in md_tmpl) {
+            lines <- readLines(f, warn = FALSE, encoding = "UTF-8")
+            fm <- extract_frontmatter(lines)
+            if (is.null(fm)) next
+            tryCatch(
+              yaml.load(fm),
+              error = function(e) fail(paste("Markdown template frontmatter YAML parse failed:", f, conditionMessage(e)))
+            )
+          }
+          cat("OK: parsed Markdown template frontmatter:", length(md_tmpl), "(checked only when present)\n")
+
+          qmd_files <- list.files("skills", recursive = TRUE, full.names = TRUE, pattern = "\\\\.qmd$", ignore.case = TRUE)
+          qmd_files <- qmd_files[grepl("/assets/templates/", norm(qmd_files), fixed = TRUE)]
+          for (f in qmd_files) {
+            lines <- readLines(f, warn = FALSE, encoding = "UTF-8")
+            fm <- extract_frontmatter(lines)
+            if (is.null(fm)) fail(paste("Missing YAML frontmatter in QMD template:", f))
+            tryCatch(
+              yaml.load(fm),
+              error = function(e) fail(paste("QMD frontmatter YAML parse failed:", f, conditionMessage(e)))
+            )
+          }
+          cat("OK: parsed QMD frontmatter:", length(qmd_files), "\n")
+
+          # 3b) SKILL.md should have YAML frontmatter with required keys
+          skill_files <- list.files("skills", recursive = TRUE, full.names = TRUE, pattern = "^SKILL\\\\.md$", ignore.case = FALSE)
+          if (length(skill_files) == 0) fail("No SKILL.md found under skills/")
+
+          for (f in skill_files) {
+            lines <- readLines(f, warn = FALSE, encoding = "UTF-8")
+            fm <- extract_frontmatter(lines)
+            if (is.null(fm)) fail(paste("Missing SKILL.md YAML frontmatter:", f))
+            y <- tryCatch(
+              yaml.load(fm),
+              error = function(e) fail(paste("SKILL.md frontmatter YAML parse failed:", f, conditionMessage(e)))
+            )
+            if (is.null(y$name) || is.null(y$description)) {
+              fail(paste("SKILL.md missing required fields (name/description):", f))
+            }
+          }
+          cat("OK: validated SKILL.md frontmatter:", length(skill_files), "\n")
+
+          cat("\nAll sanity checks passed.\n")
+          RS
