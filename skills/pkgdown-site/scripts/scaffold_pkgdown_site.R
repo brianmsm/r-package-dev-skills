@@ -10,7 +10,7 @@
 #   - create _pkgdown.yml from a chosen template (minimal or grouped)
 #   - create index.md (site home) from template
 #   - optionally create a lean README.md (with backup)
-#   - optionally create website-only articles (Quarto) under vignettes/
+#   - optionally create website-only articles (R Markdown or Quarto) under vignettes/
 #   - optionally create a Get started vignette/article (named after package)
 #   - optionally append patterns to .Rbuildignore for website-only articles
 #   - optionally copy a pkgdown GitHub Actions example workflow
@@ -42,6 +42,7 @@ defaults <- list(
   repo = NULL,
   url = NULL,
   config = "minimal", # minimal | grouped
+  format = "auto",  # auto | rmd | qmd
   create_index = TRUE,
   write_readme = FALSE,
   create_readme_template = FALSE,
@@ -49,6 +50,7 @@ defaults <- list(
   create_articles = character(),
   web_only_articles = FALSE,
   create_workflow_example = FALSE,
+  workflow_template = "gh-pages", # gh-pages | docs-branch | pages-artifact
   force = FALSE,
   quiet = FALSE
 )
@@ -63,13 +65,15 @@ help_text <- function() {
     "      --repo NAME              GitHub repo name (used to fill templates)\n",
     "      --url URL                Site URL (overrides inferred GitHub Pages URL)\n",
     "      --config minimal|grouped Choose _pkgdown.yml template (default: minimal)\n",
+    "      --format auto|rmd|qmd     Source format for vignettes/articles (default: auto)\n",
     "      --create-index[=true|false] Create index.md from template (default: true)\n",
     "      --write-readme           Replace README.md with lean template (backs up existing, then overwrites)\n",
     "      --create-readme-template Create README-lean-template.md (non-destructive)\n",
-    "      --create-get-started     Create vignettes/<pkg>.qmd from template (dots replaced with dashes)\n",
-    "      --create-article NAME    Create vignettes/NAME.qmd from article template (repeatable)\n",
+    "      --create-get-started     Create vignettes/<pkg>.(Rmd|qmd) from template (dots replaced with dashes)\n",
+    "      --create-article NAME    Create vignettes/NAME.(Rmd|qmd) from article template (repeatable)\n",
     "      --web-only-articles      Append created article paths to .Rbuildignore\n",
-    "      --create-workflow-example Copy assets/examples/pkgdown-gha.yaml to workflow\n",
+    "      --create-workflow-example Copy an example workflow into .github/workflows/pkgdown.yaml\n",
+    "      --workflow-template gh-pages|docs-branch|pages-artifact Choose which example workflow to copy (default: gh-pages; implies --create-workflow-example)\n",
     "  -f, --force                  Overwrite existing files\n",
     "  -q, --quiet                  Reduce output\n",
     "  -h, --help                   Show this help\n",
@@ -97,6 +101,48 @@ normalize_config <- function(x) {
   if (value %in% c("minimal")) return("minimal")
   if (value %in% c("grouped", "articles-grouped")) return("grouped")
   stop(sprintf("Invalid config/template value: %s (use minimal or grouped)", x), call. = FALSE)
+}
+
+normalize_format <- function(x) {
+  value <- tolower(trimws(as.character(x)))
+  if (value %in% c("auto")) return("auto")
+  if (value %in% c("rmd", "rmarkdown")) return("rmd")
+  if (value %in% c("qmd", "quarto")) return("qmd")
+  stop(sprintf("Invalid format value: %s (use auto, rmd, or qmd)", x), call. = FALSE)
+}
+
+normalize_workflow_template <- function(x) {
+  value <- tolower(trimws(as.character(x)))
+  value <- gsub("_", "-", value, fixed = TRUE)
+
+  if (value %in% c("gh-pages", "ghpages", "ghpage")) return("gh-pages")
+  if (value %in% c("docs-branch", "docs", "docsbranch", "docs-on-branch", "docs-default-branch")) return("docs-branch")
+  if (value %in% c("pages-artifact", "artifact", "pagesartifact", "actions-artifact", "github-actions")) return("pages-artifact")
+
+  stop(sprintf("Invalid workflow template: %s (use gh-pages, docs-branch, or pages-artifact)", x), call. = FALSE)
+}
+
+has_rmd_evidence <- function(root) {
+  # Prefer the format already adopted by the repo. If there is no visible Rmd usage, default to qmd.
+  if (file.exists(file.path(root, "README.Rmd"))) return(TRUE)
+  if (file.exists(file.path(root, "index.Rmd"))) return(TRUE)
+
+  vdir <- file.path(root, "vignettes")
+  if (dir.exists(vdir)) {
+    vfiles <- list.files(vdir, recursive = TRUE, full.names = TRUE)
+    if (any(grepl("\\.Rmd$", vfiles, ignore.case = TRUE))) return(TRUE)
+  }
+
+  any(length(list.files(root, recursive = TRUE, full.names = TRUE, pattern = "\\.Rmd$", ignore.case = TRUE)) > 0)
+}
+
+resolve_format <- function(fmt, root) {
+  fmt <- normalize_format(fmt %||% "auto")
+  if (identical(fmt, "auto")) {
+    if (has_rmd_evidence(root)) return("rmd")
+    return("qmd")
+  }
+  fmt
 }
 
 normalize_article_name <- function(x) {
@@ -204,6 +250,20 @@ apply_option <- function(opts, key, value = NULL, flag_only = FALSE) {
     return(opts)
   }
 
+  if (k == "format") {
+    if (is.null(value)) stop("Missing value for --format", call. = FALSE)
+    opts$format <- normalize_format(value)
+    return(opts)
+  }
+
+  if (k == "workflow_template") {
+    if (is.null(value)) stop("Missing value for --workflow-template", call. = FALSE)
+    opts$workflow_template <- normalize_workflow_template(value)
+    # If the user chose a workflow template, enable copying by default.
+    opts$create_workflow_example <- TRUE
+    return(opts)
+  }
+
   if (k == "create_article") {
     if (is.null(value)) stop("Missing value for --create-article", call. = FALSE)
     nm <- normalize_article_name(value)
@@ -252,7 +312,7 @@ parse_args <- function(args) {
       next
     }
 
-    if (a %in% c("-t", "--target", "--pkg", "--org", "--repo", "--url", "--config", "--create-article")) {
+    if (a %in% c("-t", "--target", "--pkg", "--org", "--repo", "--url", "--config", "--format", "--workflow-template", "--create-article")) {
       if (i == length(args)) stop(sprintf("Missing value after %s", a), call. = FALSE)
       key <- if (a == "-t") "target" else sub("^--", "", a)
       opts <- apply_option(opts, key = key, value = args[[i + 1L]], flag_only = FALSE)
@@ -513,6 +573,9 @@ main <- function() {
   templates_dir <- file.path(skill_root, "assets", "templates")
   examples_dir <- file.path(skill_root, "assets", "examples")
 
+  fmt <- resolve_format(opts$format, root)
+  out_ext <- if (identical(fmt, "rmd")) "Rmd" else "qmd"
+
   if (!dir.exists(templates_dir)) stopf("Templates directory not found: %s", templates_dir)
 
   cfg_template <- switch(
@@ -526,6 +589,7 @@ main <- function() {
   msg("\n== Scaffold pkgdown site ==", quiet = opts$quiet)
   msg("Target: ", root, quiet = opts$quiet)
   msg("Config: ", opts$config, quiet = opts$quiet)
+  msg("Format: ", fmt, quiet = opts$quiet)
   if (!is.null(rep$site_url)) msg("URL:    ", rep$site_url, quiet = opts$quiet)
   msg("", quiet = opts$quiet)
 
@@ -585,11 +649,11 @@ main <- function() {
 
   # 4) get-started
   if (isTRUE(opts$create_get_started)) {
-    gs_template <- file.path(templates_dir, "get-started.qmd")
+    gs_template <- file.path(templates_dir, paste0("get-started.", out_ext))
     if (!file.exists(gs_template)) stopf("Get started template not found: %s", gs_template)
 
     gs_name <- pkgdown_get_started_stem(rep$pkg)
-    gs_out <- file.path(vignettes_dir, paste0(gs_name, ".qmd"))
+    gs_out <- file.path(vignettes_dir, paste0(gs_name, ".", out_ext))
     gs_lines <- apply_replacements(read_text(gs_template), rep)
 
     dir.create(vignettes_dir, showWarnings = FALSE, recursive = TRUE)
@@ -602,7 +666,7 @@ main <- function() {
 
   # 5) additional articles
   if (length(opts$create_articles) > 0L) {
-    art_template <- file.path(templates_dir, "article-web-only.qmd")
+    art_template <- file.path(templates_dir, paste0("article-web-only.", out_ext))
     if (!file.exists(art_template)) stopf("Article template not found: %s", art_template)
 
     dir.create(vignettes_dir, showWarnings = FALSE, recursive = TRUE)
@@ -612,7 +676,7 @@ main <- function() {
       if (!nzchar(article_name)) next
       validate_article_name(article_name)
 
-      out <- file.path(vignettes_dir, paste0(article_name, ".qmd"))
+      out <- file.path(vignettes_dir, paste0(article_name, ".", out_ext))
       assert_within_dir(vignettes_dir, out)
       art_lines <- apply_replacements(read_text(art_template), rep)
       art_lines <- set_frontmatter_title(art_lines, article_name)
@@ -626,7 +690,15 @@ main <- function() {
 
   # 6) optional workflow example
   if (isTRUE(opts$create_workflow_example)) {
-    gha_template <- file.path(examples_dir, "pkgdown-gha.yaml")
+    workflow_file <- switch(
+      opts$workflow_template,
+      "gh-pages" = "pkgdown-gha.yaml",
+      "docs-branch" = "pkgdown-gha-docs-branch.yaml",
+      "pages-artifact" = "pkgdown-gha-pages-artifact.yaml",
+      stopf("Unsupported workflow template: %s", opts$workflow_template)
+    )
+
+    gha_template <- file.path(examples_dir, workflow_file)
     if (!file.exists(gha_template)) stopf("Workflow example not found: %s", gha_template)
 
     gha_out <- file.path(root, ".github", "workflows", "pkgdown.yaml")
@@ -650,9 +722,10 @@ main <- function() {
 
   msg("\nNext steps:", quiet = opts$quiet)
   msg("  1) Review _pkgdown.yml and set final site metadata.", quiet = opts$quiet)
-  msg("  2) Review created article titles/descriptions in the .qmd front matter.", quiet = opts$quiet)
-  msg("  3) Run pkgdown::build_site() locally to preview.", quiet = opts$quiet)
-  msg("  4) Consider usethis::use_pkgdown_github_pages() for Pages deploy wiring.", quiet = opts$quiet)
+  msg("  2) Replace any remaining template placeholders (for example {domain}, {primary capability}).", quiet = opts$quiet)
+  msg("  3) Review created article titles/descriptions in the front matter.", quiet = opts$quiet)
+  msg("  4) Run pkgdown::build_site() locally to preview.", quiet = opts$quiet)
+  msg("  5) Consider usethis::use_pkgdown_github_pages() for Pages deploy wiring.", quiet = opts$quiet)
 
   quit(status = 0)
 }
