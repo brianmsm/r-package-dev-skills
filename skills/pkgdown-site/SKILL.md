@@ -65,7 +65,7 @@ Use alternatives only when explicitly requested or when constraints require them
 
 If the user does not specify an article/vignette source format, default to `--format auto` in `scripts/scaffold_pkgdown_site.R`:
 
-- If the target repo shows any `.Rmd` usage (for example `vignettes/*.Rmd`, `README.Rmd`, `index.Rmd`, or any other `.Rmd`), prefer `.Rmd`.
+- If the target repo shows `.Rmd` usage beyond a root `README.Rmd` (for example `vignettes/*.Rmd`, `index.Rmd`, or other `.Rmd` files), prefer `.Rmd`.
 - Otherwise, default to `.qmd` (Quarto).
 
 Do not auto-convert between formats as part of the default workflow.

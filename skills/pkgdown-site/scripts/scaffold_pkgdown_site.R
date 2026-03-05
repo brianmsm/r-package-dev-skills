@@ -124,16 +124,19 @@ normalize_workflow_template <- function(x) {
 
 has_rmd_evidence <- function(root) {
   # Prefer the format already adopted by the repo. If there is no visible Rmd usage, default to qmd.
-  if (file.exists(file.path(root, "README.Rmd"))) return(TRUE)
+  # NOTE: README.Rmd is common even in otherwise-Quarto repos, so it is not treated as evidence by itself.
   if (file.exists(file.path(root, "index.Rmd"))) return(TRUE)
 
   vdir <- file.path(root, "vignettes")
   if (dir.exists(vdir)) {
-    vfiles <- list.files(vdir, recursive = TRUE, full.names = TRUE)
-    if (any(grepl("\\.Rmd$", vfiles, ignore.case = TRUE))) return(TRUE)
+    vfiles <- list.files(vdir, recursive = TRUE, full.names = TRUE, pattern = "\\.Rmd$", ignore.case = TRUE)
+    if (length(vfiles) > 0) return(TRUE)
   }
 
-  any(length(list.files(root, recursive = TRUE, full.names = TRUE, pattern = "\\.Rmd$", ignore.case = TRUE)) > 0)
+  rmd_files <- list.files(root, recursive = TRUE, full.names = TRUE, pattern = "\\.Rmd$", ignore.case = TRUE)
+  rmd_files <- rmd_files[basename(rmd_files) != "README.Rmd"]
+
+  length(rmd_files) > 0
 }
 
 resolve_format <- function(fmt, root) {
