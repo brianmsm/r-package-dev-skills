@@ -42,7 +42,7 @@ jobs:
           norm <- function(x) gsub("\\\\", "/", x)
 
           # ---- 1) Parse R scripts under skills/**/scripts
-          r_scripts <- list.files("skills", recursive = TRUE, full.names = TRUE, pattern = "\\\\.R$", ignore.case = TRUE)
+          r_scripts <- list.files("skills", recursive = TRUE, full.names = TRUE, pattern = "\\.R$", ignore.case = TRUE)
           r_scripts <- r_scripts[grepl("/scripts/", norm(r_scripts), fixed = TRUE)]
           for (f in r_scripts) {
             tryCatch(
@@ -53,7 +53,7 @@ jobs:
           cat("OK: parsed R scripts:", length(r_scripts), "\n")
 
           # ---- 2) Parse YAML templates/examples under skills/**
-          yml_files <- list.files("skills", recursive = TRUE, full.names = TRUE, pattern = "\\\\.(yml|yaml)$", ignore.case = TRUE)
+          yml_files <- list.files("skills", recursive = TRUE, full.names = TRUE, pattern = "\\.(yml|yaml)$", ignore.case = TRUE)
           for (f in yml_files) {
             tryCatch(
               yaml.load_file(f),
@@ -103,7 +103,7 @@ jobs:
           }
           cat("OK: parsed Markdown template frontmatter:", length(md_tmpl), "(checked only when present)\n")
 
-          qmd_files <- list.files("skills", recursive = TRUE, full.names = TRUE, pattern = "\\\\.qmd$", ignore.case = TRUE)
+          qmd_files <- list.files("skills", recursive = TRUE, full.names = TRUE, pattern = "\\.qmd$", ignore.case = TRUE)
           qmd_files <- qmd_files[grepl("/assets/templates/", norm(qmd_files), fixed = TRUE)]
           for (f in qmd_files) {
             lines <- readLines(f, warn = FALSE, encoding = "UTF-8")
@@ -117,7 +117,7 @@ jobs:
           cat("OK: parsed QMD frontmatter:", length(qmd_files), "\n")
 
           # 3b) SKILL.md should have YAML frontmatter with required keys
-          skill_files <- list.files("skills", recursive = TRUE, full.names = TRUE, pattern = "^SKILL\\\\.md$", ignore.case = FALSE)
+          skill_files <- list.files("skills", recursive = TRUE, full.names = TRUE, pattern = "^SKILL\\.md$", ignore.case = FALSE)
           if (length(skill_files) == 0) fail("No SKILL.md found under skills/")
 
           for (f in skill_files) {
