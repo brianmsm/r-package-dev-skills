@@ -551,7 +551,7 @@ detect_unresolved_placeholders <- function(lines) {
   if (!is.character(lines) || length(lines) == 0L) return(character())
 
   # Match {placeholders} and angle-bracket placeholders used in YAML templates.
-  rx <- "(<user-or-org>|<repo>|\\{[A-Za-z0-9_]+\\})"
+  rx <- "(<user-or-org>|<repo>|\\{[A-Za-z_][A-Za-z0-9_]*\\})"
   matches <- regmatches(lines, gregexpr(rx, lines, perl = TRUE))
   tokens <- unique(unlist(matches, use.names = FALSE))
 
@@ -758,7 +758,14 @@ main <- function() {
     for (p in created) msg("- ", p, quiet = opts$quiet)
   }
 
-  report_unresolved_placeholders(created, quiet = opts$quiet)
+  to_scan <- unique(c(
+    created,
+    file.path(root, "_pkgdown.yml"),
+    if (isTRUE(opts$create_index)) file.path(root, "index.md") else character(),
+    if (isTRUE(opts$write_readme)) file.path(root, "README.md") else character(),
+    if (isTRUE(opts$create_readme_template)) file.path(root, "README-lean-template.md") else character()
+  ))
+  report_unresolved_placeholders(to_scan, quiet = opts$quiet)
   msg("\nNext steps:", quiet = opts$quiet)
   msg("  1) Review _pkgdown.yml and set final site metadata.", quiet = opts$quiet)
   msg("  2) Replace any remaining template placeholders (for example {domain}, {primary capability}).", quiet = opts$quiet)
