@@ -5,6 +5,14 @@ description: Reusable workflow for your task area. Use this skill when an AI age
 
 # Skill: Your Skill Name
 
+## Before You Start
+
+- Copy this template folder to `skills/<skill-name>/`.
+- Replace the frontmatter `name` and `description` values.
+- Replace the title and fill in the sections with imperative, procedural instructions.
+- Keep generated content in English (see repo-level AGENTS.md).
+
+
 ## Objective
 
 Define the outcome this skill should produce.
