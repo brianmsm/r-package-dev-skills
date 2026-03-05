@@ -546,6 +546,44 @@ append_rbuildignore <- function(root, paths_to_ignore, quiet = FALSE) {
   TRUE
 }
 
+
+detect_unresolved_placeholders <- function(lines) {
+  if (!is.character(lines) || length(lines) == 0L) return(character())
+
+  # Match {placeholders} and angle-bracket placeholders used in YAML templates.
+  rx <- "(<user-or-org>|<repo>|\\{[A-Za-z0-9_]+\\})"
+  matches <- regmatches(lines, gregexpr(rx, lines, perl = TRUE))
+  tokens <- unique(unlist(matches, use.names = FALSE))
+
+  # Ignore common code-fence token from Quarto/R Markdown chunks.
+  tokens <- setdiff(tokens, c("{r}"))
+  tokens[nzchar(tokens)]
+}
+
+unresolved_placeholders_by_file <- function(paths) {
+  if (length(paths) == 0L) return(list())
+
+  out <- list()
+  for (p in paths) {
+    if (!file.exists(p)) next
+    lines <- tryCatch(readLines(p, warn = FALSE, encoding = "UTF-8"), error = function(e) character())
+    toks <- detect_unresolved_placeholders(lines)
+    if (length(toks) > 0L) out[[p]] <- toks
+  }
+  out
+}
+
+report_unresolved_placeholders <- function(paths, quiet = FALSE) {
+  hits <- unresolved_placeholders_by_file(paths)
+  if (length(hits) == 0L) return(invisible(FALSE))
+
+  msg("\nNote: Unresolved placeholders detected (replace before publishing):", quiet = quiet)
+  for (p in names(hits)) {
+    msg("- ", p, ": ", paste(hits[[p]], collapse = ", ") , quiet = quiet)
+  }
+  invisible(TRUE)
+}
+
 main <- function() {
   opts <- parse_args(commandArgs(trailingOnly = TRUE))
   root <- normalizePath(opts$target, winslash = "/", mustWork = FALSE)
@@ -720,6 +758,7 @@ main <- function() {
     for (p in created) msg("- ", p, quiet = opts$quiet)
   }
 
+  report_unresolved_placeholders(created, quiet = opts$quiet)
   msg("\nNext steps:", quiet = opts$quiet)
   msg("  1) Review _pkgdown.yml and set final site metadata.", quiet = opts$quiet)
   msg("  2) Replace any remaining template placeholders (for example {domain}, {primary capability}).", quiet = opts$quiet)
