@@ -1,0 +1,118 @@
+---
+title: "Get started with REPO"
+description: >
+  A guided, minimal happy-path workflow for REPO. This page is intentionally short.
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Get started with REPO}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+<!--
+Template notes
+- To make this appear as the top-level "Get started" link in pkgdown, name the file after your package:
+  - Example: vignettes/<package>.Rmd
+  - If the package name contains a dot (example: pack.down), use a dash in the vignette name (example: pack-down.Rmd).
+- Keep this guide short and stable. Move advanced details to other articles.
+-->
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  message = FALSE,
+  warning = FALSE
+)
+```
+
+## What you will do
+
+In this guide, you will:
+
+1. Install REPO
+2. Run one minimal, stable example
+3. Learn where to go next (Workflows, Reference, FAQ)
+
+## Install
+
+```{r}
+# Recommended (fast)
+# install.packages("pak")
+pak::pak("ORG/REPO")
+```
+
+Alternative:
+
+```{r}
+# install.packages("remotes")
+remotes::install_github("ORG/REPO")
+```
+
+## Load the package
+
+```{r}
+library(REPO)
+```
+
+## A minimal workflow
+
+This section should demonstrate a single, stable happy path.
+
+### Inputs
+
+Briefly describe the expected inputs:
+
+- Data format: {data description}
+- Required columns: {columns}
+- Assumptions: {assumptions}
+
+### Step 1. Prepare data
+
+```{r}
+# Replace with a real helper once stable
+# data <- REPO::example_data()
+# data <- REPO::prep_data(data, ...)
+```
+
+### Step 2. Fit the model
+
+```{r}
+# fit <- REPO::fit_model(data, ...)
+```
+
+### Step 3. Inspect results
+
+```{r}
+# summary(fit)
+# plot(fit)
+```
+
+### Step 4. Extract key outputs
+
+```{r}
+# out <- REPO::extract_results(fit)
+# out
+```
+
+## Common pitfalls
+
+- **Pitfall 1**: {short description}
+  - Fix: {short fix}
+
+- **Pitfall 2**: {short description}
+  - Fix: {short fix}
+
+## Where to go next
+
+- **Workflows**: See the Articles section for end-to-end guides by module.
+- **Reference**: Use Reference pages to understand individual functions and arguments.
+- **FAQ**: See the FAQ and troubleshooting article for common issues.
+
+## Session info
+
+If you report issues, include your session info:
+
+```{r}
+sessionInfo()
+```
