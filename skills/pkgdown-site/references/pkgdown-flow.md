@@ -177,6 +177,28 @@ Cons:
 
 - website output lives alongside source code
 
+
+#### Pattern C: GitHub Pages "Source: GitHub Actions" (artifact deploy)
+
+- Build the site in CI (commonly into `docs/`).
+- Upload `docs/` as a GitHub Pages artifact.
+- Deploy using `actions/deploy-pages`.
+
+Pros:
+
+- no `gh-pages` branch
+- no commits of `docs/` to the default branch
+
+Cons:
+
+- requires configuring Pages Source as "GitHub Actions"
+- slightly different mental model than branch-based Pages
+
+Use this when the user explicitly wants to avoid both:
+
+- a `gh-pages` branch, and
+- committing rendered output to the default branch
+
 Most pkgdown setups using `usethis::use_pkgdown_github_pages()` plus common Actions templates follow Pattern A.
 
 Checks:
