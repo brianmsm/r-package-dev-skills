@@ -4,7 +4,7 @@
 <!-- Add badges as needed: CRAN status, R-CMD-check, pkgdown site, coverage, lifecycle -->
 <!-- badges: end -->
 
-{pkg} is an R package for {one-line description}. It focuses on {core value}, and supports workflows for {modules list}.
+{pkg} is an R package for {one_line_description}. It focuses on {core_value}, and supports workflows for {modules_list}.
 
 - Website: {pkgdown_url}
 - Roadmap: {roadmap_link}
@@ -68,6 +68,6 @@ This package is under active development.
 
 If you use {pkg} in academic work, please cite:
 
-- {Author}, {Year}. {Title}. {Venue or preprint}. {DOI or URL}
+- {citation_author}, {citation_year}. {citation_title}. {citation_venue_or_preprint}. {citation_doi_or_url}
 
 A `CITATION` file may be added later.

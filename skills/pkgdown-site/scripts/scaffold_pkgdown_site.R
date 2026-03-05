@@ -768,7 +768,7 @@ main <- function() {
   report_unresolved_placeholders(to_scan, quiet = opts$quiet)
   msg("\nNext steps:", quiet = opts$quiet)
   msg("  1) Review _pkgdown.yml and set final site metadata.", quiet = opts$quiet)
-  msg("  2) Replace any remaining template placeholders (for example {domain}, {primary capability}).", quiet = opts$quiet)
+  msg("  2) Replace any remaining template placeholders (for example {domain}, {primary_capability}).", quiet = opts$quiet)
   msg("  3) Review created article titles/descriptions in the front matter.", quiet = opts$quiet)
   msg("  4) Run pkgdown::build_site() locally to preview.", quiet = opts$quiet)
   msg("  5) Consider usethis::use_pkgdown_github_pages() for Pages deploy wiring.", quiet = opts$quiet)

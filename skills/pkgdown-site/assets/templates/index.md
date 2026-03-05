@@ -1,31 +1,31 @@
 ---
-title: "REPO: one-line value proposition"
+title: "{pkg}: {one_line_value_proposition}"
 ---
 
-# REPO: one-line value proposition
+# {pkg}: {one_line_value_proposition}
 
-REPO is an R package for {domain}. It provides {primary capability} with a focus on {principles}, and supports workflows for {modules list}.
+{pkg} is an R package for {domain}. It provides {primary_capability} with a focus on {principles}, and supports workflows for {modules_list}.
 
 ## Status
 
 This package is under active development. Some functions and defaults may change as the core API stabilizes.
 
-- Stable: {stable areas}
-- Evolving: {evolving areas}
-- Planned: {planned areas} (see Roadmap)
+- Stable: {stable_areas}
+- Evolving: {evolving_areas}
+- Planned: {planned_areas} (see Roadmap)
 
 ## Install
 
 ```r
 # install.packages("pak")
-pak::pak("ORG/REPO")
+pak::pak("{org}/{repo}")
 ```
 
 If you prefer remotes:
 
 ```r
 # install.packages("remotes")
-remotes::install_github("ORG/REPO")
+remotes::install_github("{org}/{repo}")
 ```
 
 ## Quick start
@@ -33,33 +33,33 @@ remotes::install_github("ORG/REPO")
 This example is intentionally small. For full workflows, see the Articles section.
 
 ```r
-library(REPO)
+library({pkg})
 
 # Minimal example (replace with a real, stable happy path)
-# x <- REPO::example_data()
-# fit <- REPO::fit_model(x, ...)
+# x <- {pkg}::example_data()
+# fit <- {pkg}::fit_model(x, ...)
 # summary(fit)
 ```
 
-## What you can do with REPO
+## What you can do with {pkg}
 
 Choose a path based on your goal.
 
 ### Module map
 
-- **{Module 1}**
-  - What it helps with: {short description}
-  - Start here: Articles -> {module 1 workflow}
+- **{module_1_name}**
+  - What it helps with: {module_1_description}
+  - Start here: Articles -> {module_1_workflow}
   - Key functions: `{fun1}()`, `{fun2}()`
 
-- **{Module 2}**
-  - What it helps with: {short description}
-  - Start here: Articles -> {module 2 workflow}
+- **{module_2_name}**
+  - What it helps with: {module_2_description}
+  - Start here: Articles -> {module_2_workflow}
   - Key functions: `{fun3}()`, `{fun4}()`
 
-- **{Module 3}**
-  - What it helps with: {short description}
-  - Start here: Articles -> {module 3 workflow}
+- **{module_3_name}**
+  - What it helps with: {module_3_description}
+  - Start here: Articles -> {module_3_workflow}
   - Key functions: `{fun5}()`, `{fun6}()`
 
 ## Recommended reading order
@@ -95,8 +95,8 @@ See `CONTRIBUTING` for development guidelines.
 
 ## Citation
 
-If you use REPO in academic work, cite:
+If you use {pkg} in academic work, cite:
 
-- {Author}, {Year}. {Title}. {Venue or preprint}. {DOI or URL}
+- {citation_author}, {citation_year}. {citation_title}. {citation_venue_or_preprint}. {citation_doi_or_url}
 
 A `CITATION` file may be added later for standardized citations.

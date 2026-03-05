@@ -1,7 +1,7 @@
 ---
-title: "Article title"
+title: "{article_title}"
 description: >
-  One sentence summary of what this guide helps the user accomplish.
+  {article_summary}
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Article title}
@@ -29,28 +29,28 @@ knitr::opts_chunk$set(
 
 State the concrete goal of this article:
 
-- By the end, you will be able to {do X} with {pkg}.
+- By the end, you will be able to {goal_action} with {pkg}.
 
 ## Audience
 
 Who is this for?
 
-- New users who {need Y}
-- Intermediate users who {need Z}
+- Primary audience: {audience_primary}
+- Secondary audience: {audience_secondary}
 
 ## Prerequisites
 
 What the user needs before starting:
 
-- R version: {e.g., >= 4.2}
+- R version: >= {r_version_min}
 - Packages: `{pkg}`, `{dependency1}`, `{dependency2}`
-- Data requirements: {format, required columns, assumptions}
+- Data requirements: {data_requirements}
 
 Optionally provide a small checklist:
 
-- [ ] {Requirement 1}
-- [ ] {Requirement 2}
-- [ ] {Requirement 3}
+- [ ] {requirement_1}
+- [ ] {requirement_2}
+- [ ] {requirement_3}
 
 ## Setup
 
@@ -61,8 +61,8 @@ library({pkg})
 If you need optional dependencies:
 
 ```{r}
-# install.packages("{pkg2}")
-# library({pkg2})
+# install.packages("{optional_pkg}")
+# library({optional_pkg})
 ```
 
 ## Overview of the workflow

@@ -1,10 +1,10 @@
 ---
-title: "Get started with REPO"
+title: "Get started with {pkg}"
 description: >
-  A guided, minimal happy-path workflow for REPO. This page is intentionally short.
+  A guided, minimal happy-path workflow for {pkg}. This page is intentionally short.
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Get started with REPO}
+  %\VignetteIndexEntry{Get started with {pkg}}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -30,7 +30,7 @@ knitr::opts_chunk$set(
 
 In this guide, you will:
 
-1. Install REPO
+1. Install {pkg}
 2. Run one minimal, stable example
 3. Learn where to go next (Workflows, Reference, FAQ)
 
@@ -39,20 +39,20 @@ In this guide, you will:
 ```{r}
 # Recommended (fast)
 # install.packages("pak")
-pak::pak("ORG/REPO")
+pak::pak("{org}/{repo}")
 ```
 
 Alternative:
 
 ```{r}
 # install.packages("remotes")
-remotes::install_github("ORG/REPO")
+remotes::install_github("{org}/{repo}")
 ```
 
 ## Load the package
 
 ```{r}
-library(REPO)
+library({pkg})
 ```
 
 ## A minimal workflow
@@ -63,22 +63,22 @@ This section should demonstrate a single, stable happy path.
 
 Briefly describe the expected inputs:
 
-- Data format: {data description}
-- Required columns: {columns}
+- Data format: {data_description}
+- Required columns: {required_columns}
 - Assumptions: {assumptions}
 
 ### Step 1. Prepare data
 
 ```{r}
 # Replace with a real helper once stable
-# data <- REPO::example_data()
-# data <- REPO::prep_data(data, ...)
+# data <- {pkg}::example_data()
+# data <- {pkg}::prep_data(data, ...)
 ```
 
 ### Step 2. Fit the model
 
 ```{r}
-# fit <- REPO::fit_model(data, ...)
+# fit <- {pkg}::fit_model(data, ...)
 ```
 
 ### Step 3. Inspect results
@@ -91,17 +91,17 @@ Briefly describe the expected inputs:
 ### Step 4. Extract key outputs
 
 ```{r}
-# out <- REPO::extract_results(fit)
+# out <- {pkg}::extract_results(fit)
 # out
 ```
 
 ## Common pitfalls
 
-- **Pitfall 1**: {short description}
-  - Fix: {short fix}
+- **Pitfall 1**: {pitfall_1_description}
+  - Fix: {pitfall_1_fix}
 
-- **Pitfall 2**: {short description}
-  - Fix: {short fix}
+- **Pitfall 2**: {pitfall_2_description}
+  - Fix: {pitfall_2_fix}
 
 ## Where to go next
 

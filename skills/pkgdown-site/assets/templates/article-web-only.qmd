@@ -1,7 +1,7 @@
 ---
-title: "{Article title}"
+title: "{article_title}"
 description: >
-  {One-sentence summary of what this guide helps the user accomplish.}
+  {article_summary}
 format:
   html:
     minimal: true
@@ -29,28 +29,28 @@ Template notes
 
 State the concrete goal of this article:
 
-- By the end, you will be able to {do X} with {pkg}.
+- By the end, you will be able to {goal_action} with {pkg}.
 
 ## Audience
 
 Who is this for?
 
-- New users who {need Y}
-- Intermediate users who {need Z}
+- Primary audience: {audience_primary}
+- Secondary audience: {audience_secondary}
 
 ## Prerequisites
 
 What the user needs before starting:
 
-- R version: {e.g., >= 4.2}
+- R version: >= {r_version_min}
 - Packages: `{pkg}`, `{dependency1}`, `{dependency2}`
-- Data requirements: {format, required columns, assumptions}
+- Data requirements: {data_requirements}
 
 Optionally provide a small checklist:
 
-- [ ] {Requirement 1}
-- [ ] {Requirement 2}
-- [ ] {Requirement 3}
+- [ ] {requirement_1}
+- [ ] {requirement_2}
+- [ ] {requirement_3}
 
 ## Setup
 
@@ -61,8 +61,8 @@ library({pkg})
 If you need optional dependencies:
 
 ```r
-# install.packages("{pkg2}")
-# library({pkg2})
+# install.packages("{optional_pkg}")
+# library({optional_pkg})
 ```
 
 ## Overview of the workflow
@@ -123,38 +123,38 @@ If appropriate, include a table-friendly object.
 
 List common failures and how to fix them.
 
-### Pitfall 1: {short name}
+### Pitfall 1: {pitfall_1_name}
 
-**Symptom:** {what user sees}
-**Cause:** {likely cause}
-**Fix:** {what to do}
+**Symptom:** {pitfall_1_symptom}
+**Cause:** {pitfall_1_cause}
+**Fix:** {pitfall_1_fix}
 
 ```r
 # Example fix
 # x <- {pkg}::prep_data(x, ...)
 ```
 
-### Pitfall 2: {short name}
+### Pitfall 2: {pitfall_2_name}
 
-**Symptom:** {what user sees}
-**Cause:** {likely cause}
-**Fix:** {what to do}
+**Symptom:** {pitfall_2_symptom}
+**Cause:** {pitfall_2_cause}
+**Fix:** {pitfall_2_fix}
 
 ## Variations
 
 Optional: add one or two variations, but avoid turning the article into a full manual.
 
-- Variation A: {when to use it}
-- Variation B: {when to use it}
+- Variation A: {variation_a_when_to_use}
+- Variation B: {variation_b_when_to_use}
 
 ## See also
 
 Link the user to the next best resources:
 
 - Reference: `{pkg}::function_name()` documentation
-- Articles: {related workflow article}
-- FAQ: {faq article}
-- Troubleshooting: {troubleshooting article}
+- Articles: {related_workflow_article}
+- FAQ: {faq_article}
+- Troubleshooting: {troubleshooting_article}
 
 ## Session info
 
