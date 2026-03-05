@@ -4,7 +4,7 @@ description: >
   {article_summary}
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Article title}
+  %\VignetteIndexEntry{Web-only article}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

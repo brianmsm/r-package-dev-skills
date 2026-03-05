@@ -50,17 +50,17 @@ Choose a path based on your goal.
 - **{module_1_name}**
   - What it helps with: {module_1_description}
   - Start here: Articles -> {module_1_workflow}
-  - Key functions: `{fun1}()`, `{fun2}()`
+  - Key functions: `{module_1_fun1}()`, `{module_1_fun2}()`
 
 - **{module_2_name}**
   - What it helps with: {module_2_description}
   - Start here: Articles -> {module_2_workflow}
-  - Key functions: `{fun3}()`, `{fun4}()`
+  - Key functions: `{module_2_fun1}()`, `{module_2_fun2}()`
 
 - **{module_3_name}**
   - What it helps with: {module_3_description}
   - Start here: Articles -> {module_3_workflow}
-  - Key functions: `{fun5}()`, `{fun6}()`
+  - Key functions: `{module_3_fun1}()`, `{module_3_fun2}()`
 
 ## Recommended reading order
 
