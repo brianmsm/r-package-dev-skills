@@ -115,7 +115,9 @@ Example usage (run skill scripts directly, passing explicit paths):
 - `Rscript <path-to-skill>/scripts/validate_pkgdown_config.R /path/to/package/_pkgdown.yml --strict`
 - `Rscript <path-to-skill>/scripts/scaffold_pkgdown_site.R --target /path/to/package/root --pkg <pkg> --org <org> --repo <repo>`
 
-In this repository, `<path-to-skill>` is `skills/pkgdown-site`.
+The skill directory is the folder that contains this SKILL.md file.
+
+Example (this repository): `<path-to-skill>` is `skills/pkgdown-site`.
 
 ## Standard Workflow
 
