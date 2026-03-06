@@ -20,6 +20,15 @@ url: https://<user-or-org>.github.io/<repo>/
 template:
   bootstrap: 5
 
+  # Optional: official light/dark mode toggle (Bootstrap 5 + pkgdown)
+  # light-switch: true
+  # bslib:
+  #   # Start with navbar colors only (low-risk)
+  #   navbar-light-bg: "#0B5FFF"
+  #   navbar-dark-bg:  "#0B1F3B"
+  #
+  # Optional: keep small CSS tweaks in pkgdown/extra.css (avoid broad resets).
+
 # Optional: improve home page metadata for search engines and landing clarity.
 # home:
 #   title: "An R package for <short searchable topic>"

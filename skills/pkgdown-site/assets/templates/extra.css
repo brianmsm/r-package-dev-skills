@@ -1,0 +1,41 @@
+/* pkgdown extra.css (template)
+ *
+ * Copy this file into your R package repo at:
+ *   pkgdown/extra.css
+ *
+ * Goals:
+ * - Small, targeted contrast improvements for dark mode
+ * - Avoid broad CSS overrides that fight pkgdown/Bootstrap defaults
+ */
+
+/* Dark mode tweaks (Bootstrap 5.3 color modes) */
+[data-bs-theme="dark"] {
+  /* Slightly improve general text contrast */
+  --bs-body-color: rgba(255, 255, 255, 0.88);
+  --bs-body-bg: #0B1220;
+}
+
+/* Links: readable with clear hover */
+[data-bs-theme="dark"] a {
+  color: #7AB6FF;
+  text-decoration-color: rgba(122, 182, 255, 0.45);
+}
+
+[data-bs-theme="dark"] a:hover {
+  color: #A8D1FF;
+  text-decoration-color: rgba(168, 209, 255, 0.75);
+}
+
+/* Inline code: ensure it is legible */
+[data-bs-theme="dark"] code {
+  color: rgba(255, 255, 255, 0.90);
+  background-color: rgba(255, 255, 255, 0.08);
+  border-radius: 0.25rem;
+  padding: 0.05rem 0.25rem;
+}
+
+/* Fenced code blocks: distinct but not pure black */
+[data-bs-theme="dark"] pre,
+[data-bs-theme="dark"] pre code {
+  background-color: rgba(255, 255, 255, 0.06);
+}
