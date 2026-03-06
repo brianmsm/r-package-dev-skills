@@ -122,28 +122,28 @@ normalize_workflow_template <- function(x) {
   stop(sprintf("Invalid workflow template: %s (use gh-pages, docs-branch, or pages-artifact)", x), call. = FALSE)
 }
 
-has_rmd_evidence <- function(root) {
-  # Prefer the format already adopted by the repo. If there is no visible Rmd usage, default to qmd.
-  # NOTE: README.Rmd is common even in otherwise-Quarto repos, so it is not treated as evidence by itself.
-  if (file.exists(file.path(root, "index.Rmd"))) return(TRUE)
+has_quarto_evidence <- function(root) {
+  # AUTO format selection: default to .Rmd unless the repo already uses Quarto.
+  if (file.exists(file.path(root, "_quarto.yml"))) return(TRUE)
 
-  vdir <- file.path(root, "vignettes")
-  if (dir.exists(vdir)) {
-    vfiles <- list.files(vdir, recursive = TRUE, full.names = TRUE, pattern = "\\.Rmd$", ignore.case = TRUE)
-    if (length(vfiles) > 0) return(TRUE)
+  qmd_files <- list.files(root, recursive = TRUE, full.names = TRUE, pattern = "\\.qmd$", ignore.case = TRUE)
+  if (length(qmd_files) > 0) return(TRUE)
+
+  desc <- file.path(root, "DESCRIPTION")
+  if (file.exists(desc)) {
+    txt <- paste(readLines(desc, warn = FALSE), collapse = "\n")
+    if (grepl("(?is)\\bVignetteBuilder\\s*:\\s*.*\\bquarto\\b", txt, perl = TRUE)) return(TRUE)
+    if (grepl("(?is)\\bSuggests\\s*:\\s*.*\\bquarto\\b", txt, perl = TRUE)) return(TRUE)
   }
 
-  rmd_files <- list.files(root, recursive = TRUE, full.names = TRUE, pattern = "\\.Rmd$", ignore.case = TRUE)
-  rmd_files <- rmd_files[basename(rmd_files) != "README.Rmd"]
-
-  length(rmd_files) > 0
+  FALSE
 }
 
 resolve_format <- function(fmt, root) {
   fmt <- normalize_format(fmt %||% "auto")
   if (identical(fmt, "auto")) {
-    if (has_rmd_evidence(root)) return("rmd")
-    return("qmd")
+    if (has_quarto_evidence(root)) return("qmd")
+    return("rmd")
   }
   fmt
 }
