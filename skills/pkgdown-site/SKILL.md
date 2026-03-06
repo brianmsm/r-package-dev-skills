@@ -81,6 +81,9 @@ Do not auto-convert between formats as part of the default workflow.
 - Pages source: Default to branch-based Pages publishing to `gh-pages`. If the user explicitly wants to avoid a `gh-pages` branch and also avoid committing rendered output to the default branch, prefer Pages Source: GitHub Actions (artifact deploy).
 - Theme customization: Default to no theme changes unless the user asks. If the user asks "make it nicer" without specifics, start with a Bootswatch theme (low-friction) and keep Bootstrap 5.
 - Dark mode (toggle): If the user asks for a light/dark mode toggle, prefer the official switch (`template.bootstrap: 5` + `template.light-switch: true`) plus minimal `bslib` tuning (start with `navbar-light-bg` / `navbar-dark-bg`).
+- Dark mode outputs: Treat dark mode as a site UI feature by default. Apply it to navbar, sidebar, page background, links, code blocks, and other documentation chrome.
+- Analytical outputs: Do not restyle plots or analytical graphics just because the site is in dark mode. Keep them neutral/light unless the user explicitly asks for a dark plotting style.
+- Tables in dark mode: HTML/CSS tables may receive light dark-mode integration, but avoid aggressive restyling that reduces analytical readability.
 - Dark-only theme: If the user asks for dark-only styling (no toggle), consider a dark Bootswatch theme and keep `light-switch` off.
 - Workflow example copying: use `--create-workflow-example` to copy an example workflow into `.github/workflows/pkgdown.yaml`. Default is `gh-pages`; select a different template with `--workflow-template gh-pages|docs-branch|pages-artifact`.
 

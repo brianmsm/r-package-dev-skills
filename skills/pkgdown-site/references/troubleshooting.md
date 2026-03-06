@@ -447,6 +447,27 @@ Fix:
 - set `navbar-light-bg` and `navbar-dark-bg`
 - if needed, add small targeted overrides in `pkgdown/extra.css` (avoid broad resets)
 
+### Symptom: Plots look too dark or visually heavy in dark mode
+
+Likely causes:
+
+- dark-mode CSS was applied too broadly
+- pkgdown dark-mode plot visibility transforms were not overridden
+- the site theme changed, but plots were also restyled without an explicit plotting-theme strategy
+
+Default fix:
+
+- keep plots neutral/light by default
+- limit dark-mode styling to the site UI
+- if needed, place plots inside a neutral container/card instead of forcing the plot itself into dark mode
+- override plot/widget dark-mode transforms in `pkgdown/extra.css` using targeted selectors only
+
+Do not start with:
+
+- global `img` selectors
+- global `svg` selectors
+- global `canvas` selectors
+
 ## Common CI Dependency Issues
 
 ### Missing system dependencies

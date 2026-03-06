@@ -101,6 +101,73 @@ Notes:
 - For robust dual-mode, prefer `light-switch: true` plus small `bslib` tweaks over a heavy Bootswatch theme.
 - If you want dark-only (no toggle), consider a dark Bootswatch theme and keep `light-switch` off.
 
+Syntax highlighting in light/dark mode:
+
+```yaml
+template:
+  bootstrap: 5
+  light-switch: true
+  theme: gruvbox-light
+  theme-dark: gruvbox-dark
+```
+
+This keeps code blocks readable in both modes without forcing the same syntax theme everywhere.
+
+Output policy in dark mode:
+
+By default, treat dark mode as a site-level presentation feature, not as a global styling rule for analytical outputs.
+
+Apply dark mode to:
+
+- navbar
+- sidebar
+- page background
+- links
+- inline code and code blocks
+- UI containers
+
+Do not automatically apply dark mode to:
+
+- static analytical plots
+- ggplot outputs
+- base graphics
+- saved figures
+- other image-like outputs
+
+Reason:
+
+- plots should remain readable and publication-ready
+- a dark site does not imply a dark plotting theme
+- forcing dark styling on plots often reduces contrast and makes outputs look less professional
+
+Tables:
+
+HTML/CSS tables may receive light dark-mode integration, but keep borders, striping, and contrast conservative.
+
+pkgdown 2.2.0 and analytical outputs:
+
+Recent pkgdown releases can apply dark-mode visibility transforms to plots in dark mode.
+
+If the user wants the site UI in dark mode but wants analytical outputs to remain neutral/light:
+
+- keep the site dark mode enabled
+- override plot/widget dark-mode transforms selectively in `pkgdown/extra.css`
+- use targeted selectors only
+
+Good candidates for targeted overrides:
+
+- `.cell-output-display img`
+- `img.r-plt`
+- `.html-widget`
+
+Avoid broad selectors such as:
+
+- `img`
+- `svg`
+- `canvas`
+
+unless the user explicitly requests a dark plotting style across all outputs.
+
 What to test (quick checklist):
 
 - Navbar contrast in light and dark (brand text, links, search)

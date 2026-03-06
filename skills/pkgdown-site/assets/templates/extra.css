@@ -6,6 +6,15 @@
  * Goals:
  * - Small, targeted contrast improvements for dark mode
  * - Avoid broad CSS overrides that fight pkgdown/Bootstrap defaults
+ *
+ * Dark mode policy:
+ * - Use this file for small UI-level fixes only.
+ * - Do not globally restyle analytical graphics by default.
+ * - Avoid broad selectors that affect:
+ *   - img
+ *   - svg
+ *   - canvas
+ * unless the user explicitly wants a dark plotting style.
  */
 
 /* Dark mode tweaks (Bootstrap 5.3 color modes) */
@@ -38,4 +47,18 @@
 [data-bs-theme="dark"] pre,
 [data-bs-theme="dark"] pre code {
   background-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Optional: keep analytical outputs neutral/light in dark mode.
+ * Use targeted selectors only when pkgdown dark-mode plot transforms
+ * make plots or widgets look too dark or visually heavy.
+ */
+[data-bs-theme="dark"] img.r-plt,
+[data-bs-theme="dark"] .cell-output-display img,
+[data-bs-theme="dark"] .html-widget,
+[data-bs-theme="dark"] .no-invert-dark-mode img.r-plt,
+[data-bs-theme="dark"] .no-invert-dark-mode .cell-output-display img,
+[data-bs-theme="dark"] .no-invert-dark-mode .html-widget {
+  filter: none !important;
+  opacity: 1;
 }
