@@ -58,6 +58,28 @@ navbar:
   #   github:
   #     icon: fa-github
   #     href: https://github.com/<user-or-org>/<repo>
+  #
+  # Optional promoted-article pattern:
+  # - Use this when one guide deserves top-level navbar placement.
+  # - Keep the promoted article in `articles:` for indexing.
+  # - Curate the visual Articles dropdown separately to avoid duplication.
+  #
+  # components:
+  #   get-started:
+  #     text: Get started
+  #     href: articles/get-started-fit-indices.html
+  #   articles:
+  #     text: Articles
+  #     menu:
+  #       - text: Core workflows
+  #       - text: SEM and parameter estimates with lavaan
+  #         href: articles/sem-and-estimates-lavaan.html
+  #       - text: Reporting and visualization
+  #         href: articles/reporting-and-visualization.html
+  #
+  # structure:
+  #   left:  [get-started, reference, articles, news]
+  #   right: [search, github]
 
 articles:
   - title: Workflows

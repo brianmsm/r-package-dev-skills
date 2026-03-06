@@ -74,6 +74,9 @@ Do not auto-convert between formats as part of the default workflow.
 
 - Home location: Default to `index.md` at repository root for the pkgdown home. Use `pkgdown/index.md` only if the user explicitly wants a "website-only" home page and prefers not to place `index.md` at repo root.
 - README strategy: Default to keep `README.md` as a lean quick-start hub for GitHub and move long-form docs to the pkgdown home (`index.md`/`pkgdown/index.md`) and articles. Do not rewrite or shorten the README unless it is already long and hard to scan, or the user explicitly requests a lean README migration.
+- Promoted articles: Default to avoid visual duplication. Do not show the same article both as a top-level navbar item and inside the Articles dropdown unless the user explicitly wants that duplication.
+- Official Get started: Prefer pkgdown's built-in top-level `Get started` behavior when the introductory article or vignette uses the package-name convention.
+- Manual promoted article: If a non-default article should be promoted to the top-level navbar, keep it in `articles:` for the formal index and curate the visual Articles dropdown separately when needed.
 - CI strictness: For exploratory/local checks and PRs, run `scripts/validate_pkgdown_config.R` without `--strict`. For deploy/push/release gating, enable `--strict`. Note: `--strict` promotes only warnings flagged as strict (it does not turn every warning into an error).
 - Pages source: Default to branch-based Pages publishing to `gh-pages`. If the user explicitly wants to avoid a `gh-pages` branch and also avoid committing rendered output to the default branch, prefer Pages Source: GitHub Actions (artifact deploy).
 - Theme customization: Default to no theme changes unless the user asks. If the user asks "make it nicer" without specifics, start with a Bootswatch theme (low-friction) and keep Bootstrap 5.

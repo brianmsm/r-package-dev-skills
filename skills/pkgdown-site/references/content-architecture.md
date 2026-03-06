@@ -113,6 +113,34 @@ Prefer article structure with:
 - pitfalls
 - links to reference pages
 
+### Promoted Article Pattern
+
+Sometimes one article deserves more prominence than the rest, for example:
+
+- a primary `Get started` guide
+- a first workflow users should see immediately
+- a migration or onboarding guide
+
+In those cases, treat the formal article index and the visual navbar as separate concerns:
+
+- keep the promoted article in `articles:` so pkgdown still indexes it
+- promote it visually in the navbar only when it improves navigation
+- curate the Articles dropdown separately if needed so the same article is not shown twice
+
+Prefer pkgdown's official top-level `Get started` behavior when possible:
+
+- if an article or vignette uses the package-name convention, pkgdown can expose it as the top-level `Get started` entry automatically
+
+If the promoted article does not use that convention:
+
+- add a dedicated navbar component for the promoted article
+- keep it listed in `articles:` for indexing
+- use `navbar.components.articles.menu` to control the visual dropdown contents when duplication would be confusing
+
+Default rule:
+
+- avoid visual duplication between a promoted top-level article and the Articles dropdown unless the user explicitly wants both
+
 ### Vignettes
 
 Use vignettes when content is stable and offline availability matters.

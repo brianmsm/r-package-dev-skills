@@ -91,7 +91,16 @@ Pattern B:
 - all guides under `Articles`
 - `Get started` is first menu item
 
-Both are valid. Pick one and stay consistent.
+Both are valid, but the default should be:
+
+- prefer a top-level `Get started` when one guide clearly serves as the main entry point
+- avoid showing the same guide both as a top-level navbar item and inside the Articles dropdown unless the user explicitly wants that duplication
+- prefer pkgdown's built-in `Get started` behavior when the article or vignette uses the package-name convention
+
+If you promote a different article manually:
+
+- keep it in `articles:` for the formal index
+- curate the visual Articles dropdown separately if needed
 
 ## Article Structure Patterns
 
