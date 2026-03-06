@@ -419,6 +419,34 @@ Fix:
 - add `navbar:` labels per section when you want grouped dropdown labels
 - rebuild
 
+## Dark Mode (Light Switch)
+
+### Symptom: The light/dark toggle does not appear
+
+Likely causes:
+
+- `template.light-switch` is not enabled.
+- Bootstrap 5 is not in use.
+
+Fix:
+
+- set `template.bootstrap: 5`
+- set `template.light-switch: true`
+- rebuild the site
+
+### Symptom: Dark mode contrast looks wrong (navbar, links, code)
+
+Likely causes:
+
+- Bootswatch theme clashing with dual-mode toggling.
+- missing dual-mode tuning for navbar and links.
+
+Fix:
+
+- start with minimal `bslib` tuning:
+- set `navbar-light-bg` and `navbar-dark-bg`
+- if needed, add small targeted overrides in `pkgdown/extra.css` (avoid broad resets)
+
 ## Common CI Dependency Issues
 
 ### Missing system dependencies

@@ -73,16 +73,43 @@ Common variables:
 - `fg`: foreground text
 - `primary`: links and primary accents
 
-### Optional Light Switch
+### Light/Dark Mode (Color Mode Toggle)
 
-Enable color-mode switcher:
+pkgdown can enable an official light/dark mode toggle when using Bootstrap 5.
+
+Minimal setup:
 
 ```yaml
 template:
+  bootstrap: 5
   light-switch: true
 ```
 
-This adds a `lightswitch` navbar component when supported by your layout.
+Recommended low-risk dual-mode recipe (navbar only):
+
+```yaml
+template:
+  bootstrap: 5
+  light-switch: true
+  bslib:
+    navbar-light-bg: "#0B5FFF"
+    navbar-dark-bg:  "#0B1F3B"
+```
+
+Notes:
+
+- For robust dual-mode, prefer `light-switch: true` plus small `bslib` tweaks over a heavy Bootswatch theme.
+- If you want dark-only (no toggle), consider a dark Bootswatch theme and keep `light-switch` off.
+
+What to test (quick checklist):
+
+- Navbar contrast in light and dark (brand text, links, search)
+- Sidebar link contrast
+- Inline and fenced code blocks
+- Tables and callouts (if present)
+- Keyboard focus outlines
+
+If anything looks off, prefer small targeted overrides in `pkgdown/extra.css` over broad CSS resets.
 
 ## Fonts
 

@@ -77,6 +77,8 @@ Do not auto-convert between formats as part of the default workflow.
 - CI strictness: For exploratory/local checks and PRs, run `scripts/validate_pkgdown_config.R` without `--strict`. For deploy/push/release gating, enable `--strict`. Note: `--strict` promotes only warnings flagged as strict (it does not turn every warning into an error).
 - Pages source: Default to branch-based Pages publishing to `gh-pages`. If the user explicitly wants to avoid a `gh-pages` branch and also avoid committing rendered output to the default branch, prefer Pages Source: GitHub Actions (artifact deploy).
 - Theme customization: Default to no theme changes unless the user asks. If the user asks "make it nicer" without specifics, start with a Bootswatch theme (low-friction) and keep Bootstrap 5.
+- Dark mode (toggle): If the user asks for a light/dark mode toggle, prefer the official switch (`template.bootstrap: 5` + `template.light-switch: true`) plus minimal `bslib` tuning (start with `navbar-light-bg` / `navbar-dark-bg`).
+- Dark-only theme: If the user asks for dark-only styling (no toggle), consider a dark Bootswatch theme and keep `light-switch` off.
 - Workflow example copying: use `--create-workflow-example` to copy an example workflow into `.github/workflows/pkgdown.yaml`. Default is `gh-pages`; select a different template with `--workflow-template gh-pages|docs-branch|pages-artifact`.
 
 ## Inputs To Collect (Minimum)
