@@ -126,7 +126,8 @@ strict_warning_codes <- c(
   "vignettes_missing_selectors",
   "articles_explicit_missing_files",
   "vignettes_empty_selectors",
-  "articles_selectors_no_match"
+  "articles_selectors_no_match",
+  "light_switch_requires_bootstrap_5"
 )
 
 is_strict_warning_code <- function(code) {
@@ -268,15 +269,54 @@ validate_template <- function(cfg, warnings, errors) {
     return(list(warnings = warnings, errors = errors))
   }
 
+  light_switch <- isTRUE(tmpl[["light-switch"]])
+
+  bs <- ""
   if (!is.null(tmpl$bootstrap)) {
-    bs <- as.character(tmpl$bootstrap[[1]])
-    if (nzchar(bs) && bs != "5") {
+    bs <- as_scalar_text(tmpl$bootstrap)
+  }
+
+  if (light_switch) {
+    if (!identical(bs, "5")) {
       warnings <- add_warning(
         warnings,
-        "bootstrap_not_5",
-        sprintf("template.bootstrap is '%s'. Most modern pkgdown sites use bootstrap: 5.", bs)
+        "light_switch_requires_bootstrap_5",
+        "template.light-switch is enabled, but template.bootstrap is not set to 5. Light/dark toggle requires Bootstrap 5."
       )
     }
+
+    bootswatch <- as_scalar_text(tmpl$bootswatch)
+    bslib_bootswatch <- ""
+    if (is.list(tmpl$bslib) && !is.null(tmpl$bslib$bootswatch)) {
+      bslib_bootswatch <- as_scalar_text(tmpl$bslib$bootswatch)
+    }
+    if (nzchar(bootswatch) || nzchar(bslib_bootswatch)) {
+      warnings <- add_warning(
+        warnings,
+        "light_switch_with_bootswatch",
+        "template.light-switch is enabled together with a Bootswatch theme. Some themes may clash with dual-mode toggling; test contrast and spacing. Prefer bslib tweaks for dual-mode."
+      )
+    }
+
+    if (is.list(tmpl$bslib)) {
+      has_nav_light <- !is.null(tmpl$bslib[["navbar-light-bg"]])
+      has_nav_dark  <- !is.null(tmpl$bslib[["navbar-dark-bg"]])
+      if (!(has_nav_light && has_nav_dark)) {
+        warnings <- add_warning(
+          warnings,
+          "light_switch_navbar_colors_missing",
+          "light-switch is enabled but navbar-light-bg/navbar-dark-bg are not both set. Consider setting them via template.bslib for predictable contrast."
+        )
+      }
+    }
+  }
+
+  if (!light_switch && nzchar(bs) && bs != "5") {
+    warnings <- add_warning(
+      warnings,
+      "bootstrap_not_5",
+      sprintf("template.bootstrap is %s. Most modern pkgdown sites use bootstrap: 5.", bs)
+    )
   }
 
   list(warnings = warnings, errors = errors)
